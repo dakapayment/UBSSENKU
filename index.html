@@ -378,7 +378,8 @@
                 userName: 'Pengguna'
             },
             tasks: [], // { id, title, date (YYYY-MM-DD), startTime, endTime, category, desc, completed }
-            habits: [] // { id, title, target, unit, icon, color, history: { 'YYYY-MM-DD': count } }
+            habits: [], // { id, title, target, unit, icon, color, history: { 'YYYY-MM-DD': count } }
+            lastUpdated: 0 // Menambahkan timestamp untuk mencegah data tertimpa
         };
 
         class Store {
@@ -393,20 +394,24 @@
             }
 
             save() {
+                // Catat waktu update terakhir sebelum menyimpan
+                this.data.lastUpdated = Date.now();
+                
                 // Simpan lokal agar UI langsung merespons dengan cepat (tanpa loading)
                 localStorage.setItem(StorageKey, JSON.stringify(this.data));
                 
                 // Auto-sync ke Google Sheets di background (Database Online Otomatis)
                 if (CONFIG.GAS_URL && CONFIG.GAS_URL !== 'MASUKKAN_URL_GAS_ANDA_DISINI') {
                     clearTimeout(this.syncTimer);
-                    // Tunggu 2 detik setelah user selesai klik/beraktivitas baru dikirim ke database
+                    // Tunggu 1.5 detik setelah user selesai klik
                     this.syncTimer = setTimeout(() => {
                         fetch(CONFIG.GAS_URL, {
                             method: 'POST',
+                            mode: 'no-cors', // Mencegah blokir koneksi (CORS) dari browser
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                             body: JSON.stringify(this.data)
                         }).catch(e => console.error('Gagal auto-sync ke database', e));
-                    }, 2000); 
+                    }, 1500); 
                 }
             }
 
@@ -445,7 +450,7 @@
             getTasksByDate(dateStr) {
                 return this.data.tasks
                     .filter(t => t.date === dateStr)
-                    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+                    .sort((a, b) => (a.startTime || '00:00').localeCompare(b.startTime || '00:00')); // Mencegah error jika jam kosong
             }
 
             // Habits
@@ -821,11 +826,15 @@
                     html += `<div class="space-y-3">`;
                     tasks.forEach(task => {
                         const catStyle = utils.getCategoryColor(task.category);
+                        // Mengamankan pembagian waktu agar tidak menyebabkan blank screen
+                        const startH = (task.startTime || '00:00').split(':')[0];
+                        const startM = (task.startTime || '00:00').split(':')[1];
+                        
                         html += `
                             <div class="bg-white dark:bg-darkCard p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 items-center">
                                 <div class="flex flex-col items-center justify-center w-12 shrink-0 border-r border-gray-100 dark:border-gray-700 pr-4">
-                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200">${task.startTime.split(':')[0]}</span>
-                                    <span class="text-[10px] text-gray-400">${task.startTime.split(':')[1]}</span>
+                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200">${startH}</span>
+                                    <span class="text-[10px] text-gray-400">${startM}</span>
                                 </div>
                                 <div class="flex-1">
                                     <h4 class="font-bold text-gray-800 dark:text-white text-sm ${task.completed ? 'line-through text-gray-400' : ''}">${task.title}</h4>
@@ -1144,22 +1153,31 @@
                 content.style.opacity = '0';
                 
                 setTimeout(() => {
-                    content.innerHTML = views[viewName]();
+                    // Try-Catch untuk mencegah Layar Blank jika ada error render
+                    try {
+                        content.innerHTML = views[viewName]();
+                    } catch (err) {
+                        console.error("Gagal memuat tampilan:", err);
+                        content.innerHTML = `<div class="p-8 text-center text-red-500 mt-10 font-medium">Ups, ada sedikit kesalahan. Coba refresh halaman Anda.</div>`;
+                    }
+                    
                     app.currentView = viewName;
                     
                     document.querySelectorAll('.nav-item').forEach(el => {
-                        const icon = el.querySelector('i');
+                        const icon = el.querySelector('i, svg');
                         const span = el.querySelector('span');
                         if (el.dataset.target === viewName) {
                             el.classList.remove('text-slate-400', 'dark:text-slate-500');
                             el.classList.add('text-primary');
-                            span.classList.add('font-bold');
-                            icon.classList.add('animate-pop');
-                            setTimeout(() => icon.classList.remove('animate-pop'), 300);
+                            if(span) span.classList.add('font-bold');
+                            if(icon) {
+                                icon.classList.add('animate-pop');
+                                setTimeout(() => icon.classList.remove('animate-pop'), 300);
+                            }
                         } else {
                             el.classList.remove('text-primary');
                             el.classList.add('text-slate-400', 'dark:text-slate-500');
-                            span.classList.remove('font-bold');
+                            if(span) span.classList.remove('font-bold');
                         }
                     });
 
@@ -1346,11 +1364,11 @@
                     const id = document.getElementById('task-id').value;
                     const taskData = {
                         title: titleInput,
-                        date: document.getElementById('task-date').value,
-                        category: document.getElementById('task-category').value,
-                        startTime: document.getElementById('task-start-time').value,
-                        endTime: document.getElementById('task-end-time').value,
-                        desc: document.getElementById('task-desc').value
+                        date: document.getElementById('task-date').value || utils.getTodayStr(),
+                        category: document.getElementById('task-category').value || 'personal',
+                        startTime: document.getElementById('task-start-time').value || '00:00',
+                        endTime: document.getElementById('task-end-time').value || '',
+                        desc: document.getElementById('task-desc').value || ''
                     };
 
                     if (id) {
@@ -1513,10 +1531,16 @@
                     const cloudData = await response.json();
                     
                     if (cloudData && cloudData.tasks && cloudData.settings) {
-                        store.data = cloudData;
-                        // Simpan ke local tanpa trigger setTimeout save()
-                        localStorage.setItem(StorageKey, JSON.stringify(store.data));
-                        ui.applyTheme();
+                        const localUpdate = store.data.lastUpdated || 0;
+                        const cloudUpdate = cloudData.lastUpdated || 0;
+                        
+                        // HANYA timpa data lokal jika data di Cloud BENAR-BENAR lebih baru
+                        if (cloudUpdate > localUpdate || localUpdate === 0) {
+                            store.data = cloudData;
+                            localStorage.setItem(StorageKey, JSON.stringify(store.data));
+                            ui.applyTheme();
+                            if(app.currentView) app.refreshCurrentView();
+                        }
                     }
                 } catch (error) {
                     console.error("Gagal load dari cloud:", error);
