@@ -94,6 +94,16 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* Safe Area untuk Mobile (iOS/Android) */
+        .pb-safe {
+            padding-bottom: 0.75rem; /* fallback */
+        }
+        @supports (padding-bottom: env(safe-area-inset-bottom)) {
+            .pb-safe {
+                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
+            }
+        }
+
         /* Checkbox custom styling */
         .custom-checkbox {
             appearance: none;
@@ -174,10 +184,10 @@
 </head>
 <body class="bg-white dark:bg-darkBg text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
-    <div id="app-container" class="flex flex-col h-[100dvh] w-full relative bg-gray-50 dark:bg-darkBg">
+    <div id="app-container" class="flex flex-col h-screen h-[100dvh] w-full relative bg-gray-50 dark:bg-darkBg overflow-hidden sm:overflow-visible">
         
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+        <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
             <!-- Views will be injected here via JavaScript -->
         </main>
 
@@ -213,7 +223,7 @@
         <div id="overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
         <!-- Quick Add Bottom Sheet -->
-        <div id="quick-add-sheet" class="fixed bottom-0 left-0 right-0 sm:absolute sm:bottom-0 bg-white dark:bg-darkCard rounded-t-3xl z-50 transform translate-y-full transition-transform duration-300 shadow-2xl">
+        <div id="quick-add-sheet" class="fixed bottom-0 left-0 right-0 sm:absolute sm:bottom-0 bg-white dark:bg-darkCard rounded-t-3xl z-50 transform translate-y-full transition-transform duration-300 shadow-2xl hidden">
             <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-6"></div>
             <div class="px-6 pb-10">
                 <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Buat Baru</h3>
@@ -356,7 +366,7 @@
         // --- KONFIGURASI DATABASE ONLINE ---
         const CONFIG = {
             // Wajib: Paste URL Web App Google Apps Script Anda di dalam tanda kutip di bawah ini!
-            GAS_URL: 'https://script.google.com/macros/s/AKfycbzrC0YAoecga039FYAZ9Dkn6zE68tlcJL5JTCX_ZnUfrwJfvXSBc0kNgAkrvFLptbq7Tg/exec'
+            GAS_URL: 'MASUKKAN_URL_GAS_ANDA_DISINI'
         };
 
         // --- DATA & STATE MANAGEMENT ---
@@ -480,6 +490,9 @@
 
         const store = new Store();
 
+        // Mencegah error "not defined" pada HTML inline onclick dengan mengekspos ke global window
+        window.store = store;
+
         // --- STREAMING_CHUNK:Defining utility functions... ---
         const utils = {
             getTodayStr: () => {
@@ -564,6 +577,8 @@
             }
         };
 
+        window.utils = utils;
+
         // --- STREAMING_CHUNK:Setting up UI helper objects... ---
         const ui = {
             toast: (message, type = 'success') => {
@@ -576,7 +591,7 @@
                 toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span class="text-sm font-medium">${message}</span>`;
                 
                 container.appendChild(toast);
-                lucide.createIcons();
+                if(typeof lucide !== 'undefined') lucide.createIcons();
 
                 setTimeout(() => {
                     toast.classList.replace('animate-slide-up', 'opacity-0');
@@ -633,6 +648,8 @@
                 }
             }
         };
+
+        window.ui = ui;
 
         // --- STREAMING_CHUNK:Building view templates (Home, Schedule, Habits, Stats, Settings)... ---
         const views = {
@@ -1156,7 +1173,7 @@
                         fab.classList.remove('hidden');
                     }
 
-                    lucide.createIcons();
+                    if(typeof lucide !== 'undefined') lucide.createIcons();
                     
                     content.style.transition = 'opacity 0.2s ease-in';
                     content.style.opacity = '1';
@@ -1190,11 +1207,15 @@
                         setTimeout(() => m.classList.add('hidden'), 300);
                     });
 
-                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                        quickAdd.classList.add('hidden');
+                    }, 300);
                 };
 
                 fab.addEventListener('click', () => {
                     overlay.classList.remove('hidden');
+                    quickAdd.classList.remove('hidden');
                     setTimeout(() => {
                         overlay.classList.remove('opacity-0');
                         quickAdd.classList.remove('translate-y-full');
@@ -1432,7 +1453,7 @@
                 }
                 
                 if(app.currentView === 'home') {
-                   setTimeout(() => app.refreshCurrentView(), 500); 
+                   setTimeout(() => app.refreshCurrentView(), 300); 
                 }
             },
 
@@ -1494,8 +1515,21 @@
             }
         };
 
+        // Mengekspos fungsi-fungsi utama agar bisa dipanggil dari HTML
+        window.app = app;
+        window.views = views;
+
         // Start App
-        document.addEventListener('DOMContentLoaded', app.init);
+        document.addEventListener('DOMContentLoaded', () => {
+            app.init();
+            
+            // Tambahan perlindungan untuk dark mode listener pada browser lama
+            if (window.matchMedia) {
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    if (store.data.settings.theme === 'system') ui.applyTheme();
+                });
+            }
+        });
 
     </script>
 </body>
