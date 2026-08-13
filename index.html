@@ -737,6 +737,9 @@
                                             <button onclick="app.editTask('${task.id}')" class="p-1.5 text-gray-400 hover:text-primary transition-colors">
                                                 <i data-lucide="edit-2" class="w-4 h-4"></i>
                                             </button>
+                                            <button onclick="app.deleteTaskDirect('${task.id}')" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </button>
                                             <input type="checkbox" class="custom-checkbox" ${task.completed ? 'checked' : ''} onchange="app.toggleTask('${task.id}', event)">
                                         </div>
                                     </div>
@@ -826,7 +829,6 @@
                     html += `<div class="space-y-3">`;
                     tasks.forEach(task => {
                         const catStyle = utils.getCategoryColor(task.category);
-                        // Mengamankan pembagian waktu agar tidak menyebabkan blank screen
                         const startH = (task.startTime || '00:00').split(':')[0];
                         const startM = (task.startTime || '00:00').split(':')[1];
                         
@@ -844,119 +846,18 @@
                                      <button onclick="app.editTask('${task.id}')" class="p-2 text-gray-400 hover:text-primary bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors">
                                         <i data-lucide="edit-2" class="w-4 h-4"></i>
                                     </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += `</div>`;
-                }
-                container.innerHTML = html;
-                lucide.createIcons();
-            },
-
-            habits: () => {
-                const habits = store.data.habits;
-                const today = utils.getTodayStr();
-
-                let html = `
-                    <div class="px-6 pt-12 pb-6">
-                        <div class="flex justify-between items-center mb-6">
-                            <div>
-                                <h1 class="text-2xl font-bold tracking-tight">Habit Tracker</h1>
-                                <p class="text-sm text-gray-500 mt-1">Bangun rutinitas positif.</p>
-                            </div>
-                            <button onclick="app.openModal('habit-modal')" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-colors">
-                                <i data-lucide="plus" class="w-5 h-5"></i>
-                            </button>
-                        </div>
-                `;
-
-                if (habits.length === 0) {
-                    html += `
-                        <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
-                            <div class="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mb-6">
-                                <i data-lucide="leaf" class="text-emerald-500 w-10 h-10"></i>
-                            </div>
-                            <h3 class="text-lg font-bold mb-2">Belum ada habit</h3>
-                            <p class="text-gray-500 text-sm mb-6 max-w-[250px]">Mulai bangun kebiasaan baik pertamamu hari ini untuk hidup yang lebih produktif.</p>
-                            <button onclick="app.openModal('habit-modal')" class="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-xl hover:scale-105 transition-transform shadow-lg">
-                                Buat Habit Baru
-                            </button>
-                        </div>
-                    `;
-                } else {
-                    html += `<div class="space-y-4">`;
-                    habits.forEach(habit => {
-                        const currentProgress = habit.history[today] || 0;
-                        const isDone = currentProgress >= habit.target;
-                        const streaks = utils.calculateStreak(habit);
-                        const colorHex = utils.getHabitColorHex(habit.color);
-
-                        let historyHtml = '<div class="flex justify-between mt-4 px-1">';
-                        for(let i=6; i>=0; i--) {
-                            let d = new Date();
-                            d.setDate(d.getDate() - i);
-                            const dStr = utils.formatDateId(d);
-                            const done = (habit.history[dStr] || 0) >= habit.target;
-                            const dayName = ['M','S','S','R','K','J','S'][d.getDay()];
-                            
-                            historyHtml += `
-                                <div class="flex flex-col items-center gap-1.5">
-                                    <span class="text-[10px] text-gray-400 font-medium">${dayName}</span>
-                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${done ? 'text-white shadow-sm' : 'bg-gray-100 dark:bg-gray-700 text-transparent'}" style="${done ? `background-color: ${colorHex}` : ''}">
-                                        ${done ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
-                                    </div>
-                                </div>
-                            `;
-                        }
-                        historyHtml += '</div>';
-
-                        html += `
-                            <div class="bg-white dark:bg-darkCard p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
-                                <div class="flex justify-between items-start mb-2">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm" style="background-color: ${colorHex}">
-                                            <i data-lucide="${habit.icon}" class="w-6 h-6"></i>
-                                        </div>
-                                        <div>
-                                            <h3 class="font-bold text-gray-800 dark:text-white">${habit.title}</h3>
-                                            <div class="flex items-center gap-2 text-xs font-medium text-orange-500 mt-0.5">
-                                                <i data-lucide="flame" class="w-3.5 h-3.5 fill-current"></i>
-                                                <span>${streaks.current} hari streak</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-1">
-                                        <button onclick="app.editHabit('${habit.id}')" class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
-                                            <i data-lucide="more-vertical" class="w-5 h-5"></i>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="mt-4 flex items-center justify-between">
-                                    <div class="flex-1 mr-4">
-                                        <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
-                                            <span>Progress</span>
-                                            <span>${currentProgress} / ${habit.target} ${habit.unit}</span>
-                                        </div>
-                                        <div class="h-2.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                            <div class="h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, (currentProgress/habit.target)*100)}%; background-color: ${colorHex}"></div>
-                                        </div>
-                                    </div>
-                                    <button onclick="app.incrementHabit('${habit.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-sm border-2 ${isDone ? 'border-transparent text-white' : 'border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300'}" style="${isDone ? `background-color: ${colorHex}` : ''}">
-                                        <i data-lucide="${isDone ? 'check' : 'plus'}" class="w-5 h-5"></i>
+                                     <button onclick="app.deleteTaskDirect('${task.id}')" class="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors">
+                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
                                     </button>
                                 </div>
-
-                                ${historyHtml}
                             </div>
                         `;
                     });
                     html += `</div>`;
                 }
 
-                html += `</div>`;
-                return html;
+                container.innerHTML = html;
+                if(typeof lucide !== 'undefined') lucide.createIcons();
             },
 
             stats: () => {
@@ -1049,35 +950,114 @@
                         });
                     }
                 }, 100);
+                return html;
+            },
 
+            habits: () => {
+                const habits = store.data.habits;
+                let html = `
+                    <div class="px-6 pt-12 pb-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h1 class="text-2xl font-bold tracking-tight">Habit Tracker</h1>
+                            <button onclick="app.openModal('habit-modal')" class="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-lg">+ Tambah</button>
+                        </div>
+                `;
+
+                if (habits.length === 0) {
+                    html += `
+                        <div class="flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-darkCard rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                                <i data-lucide="sparkles" class="text-gray-400 w-8 h-8"></i>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 font-medium mb-1">Belum ada habit</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Mulai bangun kebiasaan baik hari ini.</p>
+                            <button onclick="app.openModal('habit-modal')" class="px-5 py-2.5 bg-primary/10 text-primary font-medium rounded-xl hover:bg-primary/20 transition-colors text-sm">
+                                + Tambah Habit
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    html += `<div class="space-y-4">`;
+                    habits.forEach(habit => {
+                        const todayStr = utils.getTodayStr();
+                        const currentProgress = habit.history[todayStr] || 0;
+                        const isDone = currentProgress >= habit.target;
+                        const colorHex = utils.getHabitColorHex(habit.color);
+                        const streak = utils.calculateStreak(habit);
+
+                        html += `
+                            <div class="bg-white dark:bg-darkCard p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden transition-all hover:shadow-md">
+                                <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${colorHex}"></div>
+                                
+                                <div class="flex justify-between items-start pl-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background-color: ${colorHex}20; color: ${colorHex}">
+                                            <i data-lucide="${habit.icon}" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-gray-800 dark:text-white">${habit.title}</h3>
+                                            <div class="flex items-center gap-2 mt-1 text-xs font-medium text-gray-500">
+                                                <span class="flex items-center gap-1 text-orange-500"><i data-lucide="flame" class="w-3.5 h-3.5"></i> ${streak.current} streak</span>
+                                                <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                                                <span>Best: ${streak.best}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        <button onclick="app.editHabit('${habit.id}')" class="p-2 text-gray-400 hover:text-primary transition-colors">
+                                            <i data-lucide="edit-2" class="w-5 h-5"></i>
+                                        </button>
+                                        <button onclick="app.deleteHabitDirect('${habit.id}')" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
+                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 flex items-center justify-between pl-2">
+                                    <div class="flex-1 mr-4">
+                                        <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                                            <span>Progress</span>
+                                            <span>${currentProgress} / ${habit.target} ${habit.unit}</span>
+                                        </div>
+                                        <div class="h-2.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                            <div class="h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, (currentProgress/habit.target)*100)}%; background-color: ${colorHex}"></div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        ${currentProgress > 0 ? `
+                                        <button onclick="app.decrementHabit('${habit.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-sm border-2 border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300">
+                                            <i data-lucide="minus" class="w-5 h-5"></i>
+                                        </button>
+                                        ` : ''}
+                                        <button onclick="app.incrementHabit('${habit.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-sm border-2 ${isDone ? 'border-transparent text-white' : 'border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300'}" style="${isDone ? `background-color: ${colorHex}` : ''}">
+                                            <i data-lucide="${isDone ? 'check' : 'plus'}" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
                 return html;
             },
 
             settings: () => {
                 const s = store.data.settings;
+                
                 let html = `
-                    <div class="px-6 pt-12 pb-6">
+                    <div class="px-6 pt-12 pb-24">
                         <div class="flex items-center gap-3 mb-8">
-                            <button onclick="app.navigate('home')" class="p-2 -ml-2 text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors">
-                                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                            <button onclick="app.navigate('home')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors">
+                                <i data-lucide="arrow-left" class="w-5 h-5"></i>
                             </button>
                             <h1 class="text-2xl font-bold tracking-tight">Pengaturan</h1>
                         </div>
 
                         <div class="space-y-6">
-                            <div>
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Database Status</h3>
-                                <div class="bg-white dark:bg-darkCard rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 flex items-center gap-4">
-                                    <div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-500 shrink-0">
-                                        <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-sm text-gray-800 dark:text-white">Online Database Aktif</h4>
-                                        <p class="text-xs text-gray-500 mt-0.5">Semua perubahan Anda kini otomatis tersimpan ke Google Sheets secara real-time.</p>
-                                    </div>
-                                </div>
-                            </div>
-
+                            
                             <div>
                                 <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Tampilan</h3>
                                 <div class="bg-white dark:bg-darkCard rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
@@ -1491,7 +1471,29 @@
 
             editTask: (id) => app.openModal('task-modal', id),
             
+            deleteTaskDirect: (id) => {
+                const task = store.data.tasks.find(t => t.id === id);
+                if (task) {
+                    ui.confirm('Hapus Jadwal', `Yakin ingin menghapus "${task.title}"?`, () => {
+                        store.deleteTask(id);
+                        app.refreshCurrentView();
+                        ui.toast('Jadwal dihapus');
+                    });
+                }
+            },
+
             editHabit: (id) => app.openModal('habit-modal', id),
+
+            deleteHabitDirect: (id) => {
+                const habit = store.data.habits.find(h => h.id === id);
+                if (habit) {
+                    ui.confirm('Hapus Habit', `Semua progress "${habit.title}" akan hilang. Lanjutkan?`, () => {
+                        store.deleteHabit(id);
+                        app.refreshCurrentView();
+                        ui.toast('Habit dihapus');
+                    });
+                }
+            },
 
             incrementHabit: (id) => {
                 const result = store.updateHabitProgress(id, utils.getTodayStr());
@@ -1500,6 +1502,11 @@
                 if (result.completed && result.progress === store.data.habits.find(h=>h.id===id).target) {
                     ui.toast('Target habit tercapai! 🎉');
                 }
+            },
+
+            decrementHabit: (id) => {
+                store.updateHabitProgress(id, utils.getTodayStr(), -1);
+                app.refreshCurrentView();
             },
 
             changeTheme: (themeStr) => {
