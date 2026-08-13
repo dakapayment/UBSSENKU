@@ -1,583 +1,1502 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Life Schedule</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>My Schedule</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
                     colors: {
                         primary: '#4F46E5', // Indigo 600
-                        secondary: '#10B981', // Emerald 500
-                        darkbg: '#111827',
-                        darkcard: '#1F2937'
+                        primaryLight: '#818CF8', // Indigo 400
+                        darkBg: '#0f172a', // Slate 900
+                        darkCard: '#1e293b', // Slate 800
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.3s ease-out',
+                        'fade-in': 'fadeIn 0.2s ease-out',
+                        'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                    },
+                    keyframes: {
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)' },
+                            '100%': { transform: 'translateY(0)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        pop: {
+                            '0%': { transform: 'scale(0.95)' },
+                            '50%': { transform: 'scale(1.05)' },
+                            '100%': { transform: 'scale(1)' },
+                        }
                     }
                 }
             }
         }
     </script>
+
     <style>
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.05); }
+        /* Custom Scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #475569;
+        }
+
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
+        }
+
+        /* Hide scrollbar for main content area to look like native app */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Smooth transitions */
+        .transition-all-smooth {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Checkbox custom styling */
+        .custom-checkbox {
+            appearance: none;
+            background-color: transparent;
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.5em;
+            height: 1.5em;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.5em;
+            display: grid;
+            place-content: center;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .dark .custom-checkbox {
+            border-color: #475569;
+        }
         
-        /* Animasi Transisi */
-        .page-transition { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Checkbox Custom */
-        .custom-checkbox input:checked + div { background-color: #10B981; border-color: #10B981; }
-        .custom-checkbox input:checked + div svg { display: block; }
-        
-        /* Loading Spinner */
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #4F46E5; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .custom-checkbox::before {
+            content: "";
+            width: 0.8em;
+            height: 0.8em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            background-color: white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+
+        .custom-checkbox:checked {
+            background-color: #4F46E5;
+            border-color: #4F46E5;
+        }
+
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+
+        /* Glassmorphism for Bottom Nav */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        .dark .glass-nav {
+            background: rgba(15, 23, 42, 0.8);
+            border-top: 1px solid rgba(30, 41, 59, 0.6);
+        }
+
+        /* Floating App Container for Desktop */
+        @media (min-width: 640px) {
+            body {
+                background-color: #f1f5f9;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+            }
+            .dark body {
+                background-color: #020617;
+            }
+            #app-container {
+                width: 100%;
+                max-width: 420px;
+                height: 90vh;
+                max-height: 850px;
+                border-radius: 2rem;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                overflow: hidden;
+                position: relative;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
+<body class="bg-white dark:bg-darkBg text-slate-900 dark:text-slate-100 transition-colors duration-300">
 
-<div class="app-container bg-gray-50 dark:bg-darkbg flex flex-col">
-    
-    <!-- 1. LOGIN SCREEN -->
-    <div id="login-screen" class="flex-1 flex flex-col justify-center px-6 page-transition">
-        <div class="text-center mb-10">
-            <div class="inline-block p-4 rounded-full bg-indigo-100 text-primary mb-4">
-                <i class="fas fa-leaf text-4xl"></i>
-            </div>
-            <h1 class="text-3xl font-bold mb-2">My Life Schedule</h1>
-            <p class="text-gray-500 dark:text-gray-400">Atur hari, bangun kebiasaan baik.</p>
-        </div>
+    <div id="app-container" class="flex flex-col h-[100dvh] w-full relative bg-gray-50 dark:bg-darkBg">
         
-        <div class="bg-white dark:bg-darkcard p-6 rounded-2xl shadow-sm border dark:border-gray-800">
-            <div class="mb-4">
-                <label class="block text-sm font-medium mb-1">Username</label>
-                <input type="text" id="login-username" class="w-full p-3 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary outline-none" placeholder="Masukkan username">
-            </div>
-            <div class="mb-6">
-                <label class="block text-sm font-medium mb-1">Password</label>
-                <input type="password" id="login-password" class="w-full p-3 bg-gray-50 dark:bg-gray-800 border dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary outline-none" placeholder="Masukkan password">
-            </div>
-            <p id="login-error" class="text-red-500 text-sm mb-4 hidden text-center"></p>
-            <button onclick="handleLogin()" class="w-full bg-primary text-white p-3 rounded-xl font-semibold flex justify-center items-center gap-2 active:scale-95 transition-transform">
-                <span id="login-text">Masuk</span>
-                <div id="login-spinner" class="loader hidden"></div>
-            </button>
-        </div>
-    </div>
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-24 relative">
+            <!-- Views will be injected here via JavaScript -->
+        </main>
 
-    <!-- 2. APP MAIN LAYOUT (Hidden initially) -->
-    <div id="app-screen" class="hidden flex-1 flex flex-col h-screen">
-        
-        <!-- Top Bar / Header -->
-        <header class="pt-10 pb-4 px-6 bg-white dark:bg-darkcard shadow-sm z-10 sticky top-0">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="text-sm text-gray-500 dark:text-gray-400" id="header-date">Selasa, 13 Ags 2026</h2>
-                    <h1 class="text-2xl font-bold flex items-center gap-2">
-                        Halo, <span id="header-name">User</span> 👋
-                    </h1>
-                </div>
-                <div class="h-10 w-10 rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-white font-bold shadow-md cursor-pointer" onclick="switchTab('profile')">
-                    <span id="header-initial">U</span>
-                </div>
-            </div>
-        </header>
+        <!-- Floating Action Button (FAB) -->
+        <button id="fab-btn" class="fixed sm:absolute bottom-20 right-6 w-14 h-14 bg-primary hover:bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50 flex items-center justify-center transition-all-smooth z-40 active:scale-95">
+            <i data-lucide="plus" class="w-7 h-7"></i>
+        </button>
 
-        <!-- Main Content Area (Scrollable) -->
-        <main class="flex-1 overflow-y-auto hide-scroll pb-24 relative" id="main-content">
-            <!-- Loading Overlay -->
-            <div id="page-loader" class="absolute inset-0 bg-gray-50/80 dark:bg-darkbg/80 z-20 flex justify-center py-20 hidden">
-                <div class="loader border-primary"></div>
-            </div>
-
-            <!-- TAB: HOME -->
-            <div id="tab-home" class="p-6 page-transition">
-                <!-- Progress Section -->
-                <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 text-white shadow-lg mb-8">
-                    <div class="flex justify-between items-end mb-3">
-                        <div>
-                            <h3 class="font-medium opacity-90">Progress Hari Ini</h3>
-                            <p class="text-3xl font-bold mt-1" id="home-progress-text">0 / 0</p>
-                        </div>
-                        <i class="fas fa-trophy text-4xl opacity-20"></i>
-                    </div>
-                    <div class="w-full bg-white/20 rounded-full h-2 mt-2">
-                        <div class="bg-white h-2 rounded-full transition-all duration-1000" id="home-progress-bar" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <!-- Habits Section -->
-                <div class="mb-8">
-                    <h3 class="font-bold text-lg mb-3 flex items-center gap-2"><i class="fas fa-fire text-orange-500"></i> Habit Hari Ini</h3>
-                    <div class="flex gap-3 overflow-x-auto hide-scroll pb-2" id="home-habits-container">
-                        <!-- Disuntik via JS -->
-                    </div>
-                </div>
-
-                <!-- Jadwal Section -->
-                <div>
-                    <h3 class="font-bold text-lg mb-3 flex justify-between items-center">
-                        <span><i class="far fa-clock text-primary"></i> Jadwal Saya</span>
-                        <button onclick="switchTab('jadwal')" class="text-sm text-primary font-medium">Lihat Semua</button>
-                    </h3>
-                    <div class="space-y-3" id="home-jadwal-container">
-                        <!-- Disuntik via JS -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- TAB: JADWAL -->
-            <div id="tab-jadwal" class="hidden p-6 page-transition">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold">Jadwal</h2>
-                    <input type="date" id="jadwal-date-picker" class="p-2 rounded-lg border dark:border-gray-700 bg-white dark:bg-darkcard text-sm focus:outline-none focus:ring-1 focus:ring-primary" onchange="loadJadwalList()">
-                </div>
-
-                <!-- Template Routine Buttons -->
-                <div class="mb-6 overflow-x-auto hide-scroll pb-2 flex gap-2">
-                    <button onclick="applyRoutine('pagi')" class="whitespace-nowrap px-4 py-2 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-full text-sm font-medium"><i class="fas fa-sun mr-1"></i> Rutinitas Pagi</button>
-                    <button onclick="applyRoutine('malam')" class="whitespace-nowrap px-4 py-2 bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 rounded-full text-sm font-medium"><i class="fas fa-moon mr-1"></i> Rutinitas Malam</button>
-                </div>
-
-                <div class="space-y-3" id="jadwal-full-list">
-                    <!-- Disuntik via JS -->
-                </div>
-
-                <!-- FAB Tambah -->
-                <button onclick="toggleModal('modal-jadwal')" class="fixed bottom-24 right-6 w-14 h-14 bg-primary text-white rounded-full shadow-lg flex items-center justify-center text-xl hover:scale-105 transition-transform active:scale-95 z-30">
-                    <i class="fas fa-plus"></i>
+        <!-- Bottom Navigation -->
+        <nav class="fixed sm:absolute bottom-0 w-full glass-nav z-30 px-6 py-3 pb-safe">
+            <div class="flex justify-between items-center max-w-md mx-auto">
+                <button class="nav-item flex flex-col items-center p-2 text-primary" data-target="home">
+                    <i data-lucide="home" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button class="nav-item flex flex-col items-center p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" data-target="schedule">
+                    <i data-lucide="calendar" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Jadwal</span>
+                </button>
+                <div class="w-10"></div> <!-- Space for FAB -->
+                <button class="nav-item flex flex-col items-center p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" data-target="habits">
+                    <i data-lucide="check-circle-2" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Habit</span>
+                </button>
+                <button class="nav-item flex flex-col items-center p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" data-target="stats">
+                    <i data-lucide="bar-chart-2" class="w-6 h-6 mb-1"></i>
+                    <span class="text-[10px] font-medium">Statistik</span>
                 </button>
             </div>
+        </nav>
 
-            <!-- TAB: HABIT -->
-            <div id="tab-habit" class="hidden p-6 page-transition">
-                <h2 class="text-2xl font-bold mb-6">Habit Tracker</h2>
-                <div class="grid grid-cols-2 gap-4" id="habit-full-list">
-                    <!-- Disuntik via JS -->
-                </div>
-                <button onclick="toggleModal('modal-habit')" class="mt-6 w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-500 font-medium hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    + Tambah Habit Baru
-                </button>
-            </div>
+        <!-- Overlay -->
+        <div id="overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
 
-            <!-- TAB: PROFILE -->
-            <div id="tab-profile" class="hidden p-6 page-transition">
-                <h2 class="text-2xl font-bold mb-6">Profil & Pengaturan</h2>
-                <div class="bg-white dark:bg-darkcard rounded-2xl p-6 text-center border dark:border-gray-800 shadow-sm mb-6">
-                    <div class="w-24 h-24 mx-auto rounded-full bg-gradient-to-tr from-primary to-purple-500 flex items-center justify-center text-white text-3xl font-bold shadow-md mb-4" id="profile-initial">U</div>
-                    <h3 class="text-xl font-bold" id="profile-name">User Name</h3>
-                    <p class="text-gray-500 text-sm mb-4" id="profile-username">@username</p>
-                    <div class="inline-block px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold" id="profile-role">Admin</div>
-                </div>
-
-                <div class="space-y-4">
-                    <div class="bg-white dark:bg-darkcard p-4 rounded-xl flex justify-between items-center border dark:border-gray-800">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-moon text-gray-400"></i>
-                            <span class="font-medium">Dark Mode</span>
+        <!-- Quick Add Bottom Sheet -->
+        <div id="quick-add-sheet" class="fixed bottom-0 left-0 right-0 sm:absolute sm:bottom-0 bg-white dark:bg-darkCard rounded-t-3xl z-50 transform translate-y-full transition-transform duration-300 shadow-2xl">
+            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-6"></div>
+            <div class="px-6 pb-10">
+                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Buat Baru</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="app.openModal('task-modal')" class="flex flex-col items-center justify-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/50 hover:bg-indigo-100 transition-colors">
+                        <div class="w-12 h-12 bg-white dark:bg-indigo-800 rounded-full flex items-center justify-center shadow-sm mb-3">
+                            <i data-lucide="calendar-plus" class="text-primary w-6 h-6"></i>
                         </div>
-                        <button onclick="toggleDarkMode()" class="w-12 h-6 rounded-full bg-gray-200 dark:bg-primary relative transition-colors">
-                            <div class="w-4 h-4 rounded-full bg-white absolute top-1 left-1 dark:translate-x-6 transition-transform shadow-sm"></div>
-                        </button>
-                    </div>
-                    <button onclick="logout()" class="w-full bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400 p-4 rounded-xl font-semibold flex justify-center items-center gap-2 border border-red-100 dark:border-red-900">
-                        <i class="fas fa-sign-out-alt"></i> Keluar Aplikasi
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Jadwal</span>
+                    </button>
+                    <button onclick="app.openModal('habit-modal')" class="flex flex-col items-center justify-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 hover:bg-emerald-100 transition-colors">
+                        <div class="w-12 h-12 bg-white dark:bg-emerald-800 rounded-full flex items-center justify-center shadow-sm mb-3">
+                            <i data-lucide="sparkles" class="text-emerald-500 w-6 h-6"></i>
+                        </div>
+                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Habit</span>
                     </button>
                 </div>
             </div>
-        </main>
-
-        <!-- Bottom Navigation -->
-        <nav class="fixed bottom-0 w-full max-w-[480px] bg-white dark:bg-darkcard border-t dark:border-gray-800 flex justify-around items-center h-20 px-2 pb-2 z-20">
-            <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 w-16 text-primary" data-tab="home">
-                <i class="fas fa-home text-xl"></i>
-                <span class="text-[10px] font-medium">Home</span>
-            </button>
-            <button onclick="switchTab('jadwal')" class="nav-btn flex flex-col items-center gap-1 w-16 text-gray-400 hover:text-primary transition-colors" data-tab="jadwal">
-                <i class="far fa-calendar-alt text-xl"></i>
-                <span class="text-[10px] font-medium">Jadwal</span>
-            </button>
-            <button onclick="switchTab('habit')" class="nav-btn flex flex-col items-center gap-1 w-16 text-gray-400 hover:text-primary transition-colors" data-tab="habit">
-                <i class="fas fa-fire text-xl"></i>
-                <span class="text-[10px] font-medium">Habit</span>
-            </button>
-            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center gap-1 w-16 text-gray-400 hover:text-primary transition-colors" data-tab="profile">
-                <i class="far fa-user text-xl"></i>
-                <span class="text-[10px] font-medium">Profil</span>
-            </button>
-        </nav>
-    </div>
-
-    <!-- MODAL TAMBAH JADWAL -->
-    <div id="modal-jadwal" class="fixed inset-0 bg-black/60 z-50 hidden flex flex-col justify-end transition-opacity">
-        <div class="bg-white dark:bg-darkcard w-full max-w-[480px] mx-auto rounded-t-3xl p-6 transform translate-y-full transition-transform duration-300" id="modal-jadwal-content">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-bold">Tambah Jadwal</h3>
-                <button onclick="toggleModal('modal-jadwal')" class="text-gray-400 text-xl"><i class="fas fa-times"></i></button>
-            </div>
-            <form id="form-jadwal" onsubmit="submitJadwal(event)" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Judul Kegiatan</label>
-                    <input type="text" id="j-judul" required class="w-full p-3 bg-gray-50 dark:bg-gray-800 border rounded-xl outline-none focus:ring-1 focus:ring-primary dark:border-gray-700">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Jam Mulai</label>
-                        <input type="time" id="j-mulai" required class="w-full p-3 bg-gray-50 dark:bg-gray-800 border rounded-xl outline-none focus:ring-1 focus:ring-primary dark:border-gray-700">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Jam Selesai</label>
-                        <input type="time" id="j-selesai" required class="w-full p-3 bg-gray-50 dark:bg-gray-800 border rounded-xl outline-none focus:ring-1 focus:ring-primary dark:border-gray-700">
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Kategori</label>
-                        <select id="j-kategori" class="w-full p-3 bg-gray-50 dark:bg-gray-800 border rounded-xl outline-none focus:ring-1 focus:ring-primary dark:border-gray-700">
-                            <option>Pribadi</option><option>Kesehatan</option><option>Produktivitas</option><option>Ibadah</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Pengulangan</label>
-                        <select id="j-repeat" class="w-full p-3 bg-gray-50 dark:bg-gray-800 border rounded-xl outline-none focus:ring-1 focus:ring-primary dark:border-gray-700">
-                            <option>Tidak berulang</option><option>Setiap hari</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="w-full bg-primary text-white p-3 rounded-xl font-bold mt-4">Simpan Jadwal</button>
-            </form>
         </div>
-    </div>
-</div>
 
-<script>
-    // --- STATE MANAGEMENT ---
-    let currentUser = null;
-    let currentTheme = 'light';
-    let todayDateStr = new Date().toISOString().split('T')[0];
-    let selectedDateStr = todayDateStr;
-
-    // Inisialisasi
-    document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('jadwal-date-picker').value = todayDateStr;
-        updateHeaderDate();
-        
-        // Pura-pura cek session (Dalam implementasi aseli GAS HTML tidak punya localStorage kuat tanpa iframe sandbox, kita akan simpan di memory aja untuk sesi ini)
-    });
-
-    function updateHeaderDate() {
-        const options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-        document.getElementById('header-date').innerText = new Date().toLocaleDateString('id-ID', options);
-    }
-
-    // --- AUTHENTICATION ---
-    function handleLogin() {
-        const user = document.getElementById('login-username').value;
-        const pass = document.getElementById('login-password').value;
-        const btnText = document.getElementById('login-text');
-        const spinner = document.getElementById('login-spinner');
-        const error = document.getElementById('login-error');
-
-        if(!user || !pass) return;
-
-        btnText.classList.add('hidden');
-        spinner.classList.remove('hidden');
-        error.classList.add('hidden');
-
-        // Panggil backend
-        google.script.run
-            .withSuccessHandler((response) => {
-                btnText.classList.remove('hidden');
-                spinner.classList.add('hidden');
-                
-                if(response.success) {
-                    currentUser = response.data;
-                    setupUserProfile();
-                    document.getElementById('login-screen').classList.add('hidden');
-                    document.getElementById('app-screen').classList.remove('hidden');
-                    loadDashboard();
-                } else {
-                    error.innerText = response.message;
-                    error.classList.remove('hidden');
-                }
-            })
-            .withFailureHandler((err) => {
-                btnText.classList.remove('hidden');
-                spinner.classList.add('hidden');
-                error.innerText = "Koneksi gagal.";
-                error.classList.remove('hidden');
-            })
-            .loginUser(user, pass);
-    }
-
-    function logout() {
-        currentUser = null;
-        document.getElementById('app-screen').classList.add('hidden');
-        document.getElementById('login-screen').classList.remove('hidden');
-        document.getElementById('login-username').value = '';
-        document.getElementById('login-password').value = '';
-    }
-
-    function setupUserProfile() {
-        document.getElementById('header-name').innerText = currentUser.Nama.split(' ')[0];
-        document.getElementById('header-initial').innerText = currentUser.Nama.charAt(0).toUpperCase();
-        
-        document.getElementById('profile-name').innerText = currentUser.Nama;
-        document.getElementById('profile-username').innerText = '@' + currentUser.Username;
-        document.getElementById('profile-role').innerText = currentUser.Role;
-        document.getElementById('profile-initial').innerText = currentUser.Nama.charAt(0).toUpperCase();
-    }
-
-    // --- NAVIGATION ---
-    function switchTab(tabId) {
-        // Update Buttons
-        document.querySelectorAll('.nav-btn').forEach(btn => {
-            if(btn.dataset.tab === tabId) {
-                btn.classList.remove('text-gray-400');
-                btn.classList.add('text-primary');
-            } else {
-                btn.classList.add('text-gray-400');
-                btn.classList.remove('text-primary');
-            }
-        });
-
-        // Update Content
-        ['home', 'jadwal', 'habit', 'profile'].forEach(id => {
-            document.getElementById(`tab-${id}`).classList.add('hidden');
-        });
-        document.getElementById(`tab-${tabId}`).classList.remove('hidden');
-
-        // Load specific data
-        if(tabId === 'home') loadDashboard();
-        if(tabId === 'jadwal') loadJadwalList();
-        if(tabId === 'habit') loadHabits();
-    }
-
-    // --- DATA LOADING ---
-    function showPageLoader(show) {
-        const loader = document.getElementById('page-loader');
-        if(show) loader.classList.remove('hidden');
-        else loader.classList.add('hidden');
-    }
-
-    function loadDashboard() {
-        showPageLoader(true);
-        google.script.run
-            .withSuccessHandler(renderDashboard)
-            .getDashboardData(currentUser.Username, todayDateStr);
-    }
-
-    function renderDashboard(data) {
-        showPageLoader(false);
-        
-        // Render Progress
-        const percent = data.progress.total === 0 ? 0 : Math.round((data.progress.selesai / data.progress.total) * 100);
-        document.getElementById('home-progress-text').innerText = `${data.progress.selesai} / ${data.progress.total} selesai`;
-        document.getElementById('home-progress-bar').style.width = `${percent}%`;
-
-        // Render Habits (Mini)
-        const hc = document.getElementById('home-habits-container');
-        hc.innerHTML = '';
-        if(data.habits.length === 0) hc.innerHTML = '<p class="text-sm text-gray-500">Belum ada habit aktif.</p>';
-        data.habits.forEach(h => {
-            const bgClass = h.isDone ? 'bg-secondary text-white border-secondary' : 'bg-white dark:bg-darkcard border dark:border-gray-700';
-            const icon = h.isDone ? '<i class="fas fa-check-circle"></i>' : '<i class="far fa-circle"></i>';
-            hc.innerHTML += `
-                <div onclick="${!h.isDone ? `completeHabit('${h.ID}')` : ''}" class="flex-shrink-0 w-28 p-3 rounded-xl flex flex-col items-center justify-center text-center gap-2 cursor-pointer transition-colors ${bgClass}">
-                    <div class="text-xl">${icon}</div>
-                    <span class="text-xs font-semibold whitespace-nowrap overflow-hidden text-ellipsis w-full">${h.NamaHabit}</span>
+        <!-- Task Form Modal -->
+        <div id="task-modal" class="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white dark:bg-darkCard w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto transform sm:scale-95 transition-transform duration-300 p-6 absolute bottom-0 sm:relative">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold" id="task-modal-title">Tambah Jadwal</h3>
+                    <button class="close-modal-btn p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-gray-800 dark:hover:text-white">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
-            `;
-        });
-
-        // Render Jadwal
-        const jc = document.getElementById('home-jadwal-container');
-        jc.innerHTML = '';
-        if(data.jadwal.length === 0) jc.innerHTML = '<p class="text-sm text-gray-500 text-center py-4 border rounded-xl border-dashed">Tidak ada jadwal hari ini.</p>';
-        data.jadwal.forEach(j => {
-            const isDone = j.Status === 'Selesai';
-            jc.innerHTML += `
-                <div class="bg-white dark:bg-darkcard border dark:border-gray-800 p-4 rounded-xl flex items-center gap-4 ${isDone ? 'opacity-60' : ''}">
-                    <label class="custom-checkbox relative flex items-center justify-center cursor-pointer">
-                        <input type="checkbox" class="sr-only" ${isDone ? 'checked disabled' : ''} onchange="markJadwalDone('${j.ID}', this)">
-                        <div class="w-6 h-6 border-2 border-gray-300 dark:border-gray-600 rounded flex items-center justify-center transition-colors">
-                            <svg class="w-4 h-4 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                <form id="task-form" class="space-y-4">
+                    <input type="hidden" id="task-id">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nama Aktivitas</label>
+                        <input type="text" id="task-title" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary dark:focus:border-primary transition-colors" placeholder="Cth: Meeting Tim, Olahraga">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Tanggal</label>
+                            <input type="date" id="task-date" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
                         </div>
-                    </label>
-                    <div class="flex-1">
-                        <h4 class="font-bold text-base ${isDone ? 'line-through' : ''}">${j.Judul}</h4>
-                        <div class="flex items-center gap-2 text-xs text-gray-500 mt-1">
-                            <span><i class="far fa-clock"></i> ${j.JamMulai} - ${j.JamSelesai}</span>
-                            <span>•</span>
-                            <span class="bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded text-primary">${j.Kategori}</span>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kategori</label>
+                            <select id="task-category" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm appearance-none">
+                                <option value="personal">Pribadi</option>
+                                <option value="work">Pekerjaan</option>
+                                <option value="health">Kesehatan</option>
+                                <option value="learning">Belajar</option>
+                            </select>
                         </div>
                     </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Mulai</label>
+                            <input type="time" id="task-start-time" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Selesai</label>
+                            <input type="time" id="task-end-time" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Catatan (Opsional)</label>
+                        <textarea id="task-desc" rows="2" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors resize-none text-sm" placeholder="Tambahkan detail..."></textarea>
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-3.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-[0.98]">Simpan Jadwal</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Habit Form Modal -->
+        <div id="habit-modal" class="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 hidden opacity-0 transition-opacity duration-300">
+            <div class="bg-white dark:bg-darkCard w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto transform sm:scale-95 transition-transform duration-300 p-6 absolute bottom-0 sm:relative">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold" id="habit-modal-title">Tambah Habit</h3>
+                    <button class="close-modal-btn p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-gray-800 dark:hover:text-white">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
-            `;
-        });
-    }
-
-    // --- ACTIONS ---
-    function markJadwalDone(id, checkbox) {
-        if(!checkbox.checked) return; // Only allow checking, not unchecking for simplicity
-        checkbox.disabled = true;
-        google.script.run
-            .withSuccessHandler(() => { loadDashboard(); })
-            .updateJadwalStatus(id, currentUser.Username, 'Selesai');
-    }
-
-    function completeHabit(id) {
-        google.script.run
-            .withSuccessHandler((res) => {
-                if(res.success) {
-                    loadDashboard();
-                    if(!document.getElementById('tab-habit').classList.contains('hidden')) loadHabits();
-                }
-            })
-            .logHabit(currentUser.Username, id, todayDateStr);
-    }
-
-    // --- JADWAL TAB ---
-    function loadJadwalList() {
-        const date = document.getElementById('jadwal-date-picker').value;
-        showPageLoader(true);
-        google.script.run
-            .withSuccessHandler((data) => {
-                showPageLoader(false);
-                const jc = document.getElementById('jadwal-full-list');
-                jc.innerHTML = '';
-                if(data.jadwal.length === 0) jc.innerHTML = '<p class="text-center text-gray-500 py-10">Jadwal kosong.</p>';
-                
-                data.jadwal.forEach(j => {
-                    const isDone = j.Status === 'Selesai';
-                    jc.innerHTML += `
-                        <div class="bg-white dark:bg-darkcard border-l-4 border-primary p-4 rounded-xl shadow-sm flex justify-between items-center ${isDone ? 'opacity-50' : ''}">
-                            <div>
-                                <h4 class="font-bold ${isDone ? 'line-through' : ''}">${j.Judul}</h4>
-                                <p class="text-sm text-gray-500">${j.JamMulai} - ${j.JamSelesai} | ${j.Kategori}</p>
-                            </div>
-                            ${!isDone ? `<button onclick="markJadwalDone('${j.ID}', {checked:true})" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-300 hover:bg-secondary hover:text-white hover:border-secondary transition-colors"><i class="fas fa-check"></i></button>` : `<div class="w-8 h-8 rounded-full bg-secondary text-white flex items-center justify-center"><i class="fas fa-check"></i></div>`}
+                <form id="habit-form" class="space-y-4">
+                    <input type="hidden" id="habit-id">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nama Habit</label>
+                        <input type="text" id="habit-title" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors" placeholder="Cth: Minum Air, Membaca 10 Hal">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Target (per hari)</label>
+                            <input type="number" id="habit-target" min="1" value="1" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
                         </div>
-                    `;
-                });
-            })
-            .getDashboardData(currentUser.Username, date); // Reusing logic for ease
-    }
+                        <div>
+                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Satuan</label>
+                            <input type="text" id="habit-unit" value="kali" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm" placeholder="kali, menit, gelas">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Pilih Ikon</label>
+                        <div class="grid grid-cols-6 gap-2" id="icon-selector">
+                            <!-- Icons injected via JS -->
+                        </div>
+                        <input type="hidden" id="habit-icon" value="check-circle">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Warna</label>
+                        <div class="flex gap-3" id="color-selector">
+                            <!-- Colors injected via JS -->
+                        </div>
+                        <input type="hidden" id="habit-color" value="blue">
+                    </div>
+                    <div class="pt-2">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-3.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-[0.98]">Simpan Habit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-    // --- MODALS ---
-    function toggleModal(modalId) {
-        const modal = document.getElementById(modalId);
-        const content = modal.querySelector('div');
-        
-        if (modal.classList.contains('hidden')) {
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                content.classList.remove('translate-y-full');
-            }, 10);
-        } else {
-            content.classList.add('translate-y-full');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-    }
+        <!-- Confirmation Dialog -->
+        <div id="confirm-dialog" class="fixed inset-0 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm confirm-overlay"></div>
+            <div class="bg-white dark:bg-darkCard w-11/12 max-w-sm rounded-3xl p-6 relative z-10 transform scale-95 transition-transform shadow-2xl text-center">
+                <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+                </div>
+                <h3 id="confirm-title" class="text-xl font-bold mb-2">Hapus Item?</h3>
+                <p id="confirm-message" class="text-gray-500 dark:text-gray-400 text-sm mb-6">Tindakan ini tidak dapat dibatalkan.</p>
+                <div class="flex gap-3">
+                    <button id="confirm-cancel" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Batal</button>
+                    <button id="confirm-ok" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors shadow-lg shadow-red-200 dark:shadow-none">Hapus</button>
+                </div>
+            </div>
+        </div>
 
-    function submitJadwal(e) {
-        e.preventDefault();
-        const data = {
-            username: currentUser.Username,
-            tanggal: document.getElementById('jadwal-date-picker').value,
-            judul: document.getElementById('j-judul').value,
-            jamMulai: document.getElementById('j-mulai').value,
-            jamSelesai: document.getElementById('j-selesai').value,
-            kategori: document.getElementById('j-kategori').value,
-            repeat: document.getElementById('j-repeat').value,
-            catatan: ''
+        <!-- Toast Notification Container -->
+        <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 w-max max-w-[90%] pointer-events-none"></div>
+
+    </div>
+
+    <script>
+        // --- KONFIGURASI DATABASE ONLINE ---
+        const CONFIG = {
+            // Wajib: Paste URL Web App Google Apps Script Anda di dalam tanda kutip di bawah ini!
+            GAS_URL: 'https://script.google.com/macros/s/AKfycbzrC0YAoecga039FYAZ9Dkn6zE68tlcJL5JTCX_ZnUfrwJfvXSBc0kNgAkrvFLptbq7Tg/exec'
         };
-        
-        toggleModal('modal-jadwal');
-        showPageLoader(true);
-        google.script.run
-            .withSuccessHandler(() => {
-                e.target.reset();
-                loadJadwalList();
-                if(!document.getElementById('tab-home').classList.contains('hidden')) loadDashboard();
-            })
-            .addJadwal(data);
-    }
 
-    // --- TEMPLATE ROUTINE (Frontend Logic) ---
-    function applyRoutine(type) {
-        const date = document.getElementById('jadwal-date-picker').value;
-        const routines = [];
+        // --- DATA & STATE MANAGEMENT ---
+        const StorageKey = 'myScheduleApp_data';
         
-        if(type === 'pagi') {
-            routines.push({username: currentUser.Username, tanggal: date, judul: 'Bangun & Ibadah', jamMulai: '05:00', jamSelesai: '05:30', kategori: 'Ibadah', repeat: 'Tidak berulang', catatan: ''});
-            routines.push({username: currentUser.Username, tanggal: date, judul: 'Olahraga Pagi', jamMulai: '05:30', jamSelesai: '06:15', kategori: 'Kesehatan', repeat: 'Tidak berulang', catatan: ''});
-            routines.push({username: currentUser.Username, tanggal: date, judul: 'Mandi & Sarapan', jamMulai: '06:15', jamSelesai: '07:00', kategori: 'Pribadi', repeat: 'Tidak berulang', catatan: ''});
-        } else if (type === 'malam') {
-            routines.push({username: currentUser.Username, tanggal: date, judul: 'Evaluasi Hari', jamMulai: '20:30', jamSelesai: '21:00', kategori: 'Produktivitas', repeat: 'Tidak berulang', catatan: ''});
-            routines.push({username: currentUser.Username, tanggal: date, judul: 'Membaca Buku', jamMulai: '21:00', jamSelesai: '21:45', kategori: 'Pribadi', repeat: 'Tidak berulang', catatan: ''});
+        const defaultState = {
+            settings: {
+                theme: 'system', // 'light', 'dark', 'system'
+                userName: 'Pengguna'
+            },
+            tasks: [], // { id, title, date (YYYY-MM-DD), startTime, endTime, category, desc, completed }
+            habits: [] // { id, title, target, unit, icon, color, history: { 'YYYY-MM-DD': count } }
+        };
+
+        class Store {
+            constructor() {
+                this.data = this.load();
+                this.syncTimer = null;
+            }
+
+            load() {
+                const stored = localStorage.getItem(StorageKey);
+                return stored ? { ...defaultState, ...JSON.parse(stored) } : JSON.parse(JSON.stringify(defaultState));
+            }
+
+            save() {
+                // Simpan lokal agar UI langsung merespons dengan cepat (tanpa loading)
+                localStorage.setItem(StorageKey, JSON.stringify(this.data));
+                
+                // Auto-sync ke Google Sheets di background (Database Online Otomatis)
+                if (CONFIG.GAS_URL && CONFIG.GAS_URL !== 'MASUKKAN_URL_GAS_ANDA_DISINI') {
+                    clearTimeout(this.syncTimer);
+                    // Tunggu 2 detik setelah user selesai klik/beraktivitas baru dikirim ke database
+                    this.syncTimer = setTimeout(() => {
+                        fetch(CONFIG.GAS_URL, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                            body: JSON.stringify(this.data)
+                        }).catch(e => console.error('Gagal auto-sync ke database', e));
+                    }, 2000); 
+                }
+            }
+
+            // Tasks
+            addTask(task) {
+                task.id = 't_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+                task.completed = false;
+                this.data.tasks.push(task);
+                this.save();
+                return task;
+            }
+
+            updateTask(updatedTask) {
+                const index = this.data.tasks.findIndex(t => t.id === updatedTask.id);
+                if (index !== -1) {
+                    this.data.tasks[index] = { ...this.data.tasks[index], ...updatedTask };
+                    this.save();
+                }
+            }
+
+            deleteTask(id) {
+                this.data.tasks = this.data.tasks.filter(t => t.id !== id);
+                this.save();
+            }
+
+            toggleTask(id) {
+                const task = this.data.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.save();
+                    return task.completed;
+                }
+                return false;
+            }
+
+            getTasksByDate(dateStr) {
+                return this.data.tasks
+                    .filter(t => t.date === dateStr)
+                    .sort((a, b) => a.startTime.localeCompare(b.startTime));
+            }
+
+            // Habits
+            addHabit(habit) {
+                habit.id = 'h_' + Date.now().toString(36);
+                habit.history = {}; 
+                habit.createdAt = utils.getTodayStr();
+                this.data.habits.push(habit);
+                this.save();
+            }
+
+            updateHabit(updatedHabit) {
+                const index = this.data.habits.findIndex(h => h.id === updatedHabit.id);
+                if (index !== -1) {
+                    updatedHabit.history = this.data.habits[index].history;
+                    this.data.habits[index] = updatedHabit;
+                    this.save();
+                }
+            }
+
+            deleteHabit(id) {
+                this.data.habits = this.data.habits.filter(h => h.id !== id);
+                this.save();
+            }
+
+            updateHabitProgress(id, dateStr, increment = 1) {
+                const habit = this.data.habits.find(h => h.id === id);
+                if (habit) {
+                    const current = habit.history[dateStr] || 0;
+                    let next = current + increment;
+                    
+                    if (increment === 1 && current >= habit.target) {
+                        next = 0; // Reset
+                    }
+                    
+                    habit.history[dateStr] = Math.max(0, next);
+                    this.save();
+                    return { progress: habit.history[dateStr], completed: habit.history[dateStr] >= habit.target };
+                }
+            }
         }
 
-        if(!confirm(`Tambahkan template Rutinitas ${type} ke tanggal ini?`)) return;
+        const store = new Store();
 
-        showPageLoader(true);
-        // Sequential add for simplicity in this demo to avoid overlapping async issues in GAS
-        let added = 0;
-        routines.forEach(r => {
-            google.script.run.withSuccessHandler(() => {
-                added++;
-                if(added === routines.length) loadJadwalList();
-            }).addJadwal(r);
-        });
-    }
+        // --- STREAMING_CHUNK:Defining utility functions... ---
+        const utils = {
+            getTodayStr: () => {
+                const d = new Date();
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            },
+            formatDateId: (d) => {
+                 const date = new Date(d);
+                 return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            },
+            formatDateDisplay: (dateStr) => {
+                const options = { weekday: 'long', day: 'numeric', month: 'long' };
+                const d = new Date(dateStr);
+                return d.toLocaleDateString('id-ID', options);
+            },
+            getGreeting: () => {
+                const hour = new Date().getHours();
+                if (hour < 11) return 'Selamat pagi 🌅';
+                if (hour < 15) return 'Selamat siang ☀️';
+                if (hour < 19) return 'Selamat sore 🌇';
+                return 'Selamat malam 🌙';
+            },
+            getCategoryColor: (cat) => {
+                const colors = {
+                    'personal': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
+                    'work': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                    'health': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+                    'learning': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                };
+                return colors[cat] || colors['personal'];
+            },
+            getHabitColorHex: (colorName) => {
+                const colors = {
+                    'blue': '#3b82f6', 'emerald': '#10b981', 'pink': '#ec4899',
+                    'amber': '#f59e0b', 'purple': '#8b5cf6', 'red': '#ef4444'
+                };
+                return colors[colorName] || colors['blue'];
+            },
+            calculateStreak: (habit) => {
+                let streak = 0;
+                let dates = Object.keys(habit.history)
+                                .filter(d => habit.history[d] >= habit.target)
+                                .sort((a,b) => new Date(b) - new Date(a));
+                
+                if (dates.length === 0) return { current: 0, best: 0 };
 
-    // --- HABIT & UI UTILS ---
-    function loadHabits() {
-        showPageLoader(true);
-        google.script.run
-            .withSuccessHandler((streaks) => {
-                showPageLoader(false);
-                const hc = document.getElementById('habit-full-list');
-                hc.innerHTML = '';
-                streaks.forEach(h => {
-                    hc.innerHTML += `
-                        <div class="bg-white dark:bg-darkcard border dark:border-gray-800 p-4 rounded-xl text-center shadow-sm">
-                            <div class="w-12 h-12 mx-auto bg-orange-100 text-orange-500 rounded-full flex items-center justify-center text-xl mb-2">
-                                <i class="fas fa-fire"></i>
+                let checkDate = new Date();
+                let dateStr = utils.formatDateId(checkDate);
+                
+                if (!habit.history[dateStr] || habit.history[dateStr] < habit.target) {
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    dateStr = utils.formatDateId(checkDate);
+                }
+
+                while(habit.history[dateStr] >= habit.target) {
+                    streak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    dateStr = utils.formatDateId(checkDate);
+                }
+
+                let sortedAllDates = Object.keys(habit.history).sort((a,b) => new Date(a) - new Date(b));
+                let tempBest = 0;
+                let currentRun = 0;
+                let prevDate = null;
+
+                sortedAllDates.forEach(d => {
+                    if (habit.history[d] >= habit.target) {
+                        const currD = new Date(d);
+                        if (!prevDate) {
+                            currentRun = 1;
+                        } else {
+                            const diff = Math.round((currD - prevDate) / (1000 * 60 * 60 * 24));
+                            if (diff === 1) currentRun++;
+                            else currentRun = 1;
+                        }
+                        tempBest = Math.max(tempBest, currentRun);
+                        prevDate = currD;
+                    }
+                });
+
+                return { current: streak, best: tempBest };
+            }
+        };
+
+        // --- STREAMING_CHUNK:Setting up UI helper objects... ---
+        const ui = {
+            toast: (message, type = 'success') => {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                const bg = type === 'success' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'bg-red-500 text-white';
+                const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+                
+                toast.className = `${bg} px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3 animate-slide-up transform pointer-events-auto`;
+                toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span class="text-sm font-medium">${message}</span>`;
+                
+                container.appendChild(toast);
+                lucide.createIcons();
+
+                setTimeout(() => {
+                    toast.classList.replace('animate-slide-up', 'opacity-0');
+                    toast.style.transition = 'opacity 0.3s ease';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            },
+            
+            confirm: (title, message, onConfirm) => {
+                const dialog = document.getElementById('confirm-dialog');
+                const overlay = dialog.querySelector('.confirm-overlay');
+                const dialogBox = dialog.querySelector('.bg-white');
+                
+                document.getElementById('confirm-title').textContent = title;
+                document.getElementById('confirm-message').textContent = message;
+                
+                dialog.classList.remove('hidden');
+                setTimeout(() => {
+                    dialog.classList.remove('opacity-0');
+                    dialogBox.classList.remove('scale-95');
+                }, 10);
+
+                const close = () => {
+                    dialog.classList.add('opacity-0');
+                    dialogBox.classList.add('scale-95');
+                    setTimeout(() => dialog.classList.add('hidden'), 300);
+                    cleanup();
+                };
+
+                const okBtn = document.getElementById('confirm-ok');
+                const cancelBtn = document.getElementById('confirm-cancel');
+
+                const onOkClick = () => { onConfirm(); close(); };
+                const onCancelClick = () => { close(); };
+
+                okBtn.addEventListener('click', onOkClick);
+                cancelBtn.addEventListener('click', onCancelClick);
+                overlay.addEventListener('click', onCancelClick);
+
+                function cleanup() {
+                    okBtn.removeEventListener('click', onOkClick);
+                    cancelBtn.removeEventListener('click', onCancelClick);
+                    overlay.removeEventListener('click', onCancelClick);
+                }
+            },
+
+            applyTheme: () => {
+                const theme = store.data.settings.theme;
+                const html = document.documentElement;
+                if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    html.classList.add('dark');
+                } else {
+                    html.classList.remove('dark');
+                }
+            }
+        };
+
+        // --- STREAMING_CHUNK:Building view templates (Home, Schedule, Habits, Stats, Settings)... ---
+        const views = {
+            home: () => {
+                const today = utils.getTodayStr();
+                const tasks = store.getTasksByDate(today);
+                const completed = tasks.filter(t => t.completed).length;
+                const total = tasks.length;
+                const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+                let html = `
+                    <div class="px-6 pt-12 pb-6 bg-white dark:bg-darkBg transition-colors z-10 sticky top-0">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h1 class="text-2xl font-bold tracking-tight">${utils.getGreeting()}</h1>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">${utils.formatDateDisplay(today)}</p>
                             </div>
-                            <h4 class="font-bold text-sm mb-1">${h.NamaHabit}</h4>
-                            <p class="text-xs text-gray-500 mb-3">${h.Target}</p>
-                            <div class="text-xs font-semibold bg-gray-100 dark:bg-gray-800 py-1 px-2 rounded inline-block mb-3">
-                                🔥 ${h.currentStreak} Total
+                            <button onclick="app.navigate('settings')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors">
+                                <i data-lucide="settings" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+
+                        <!-- Progress Card -->
+                        <div class="bg-gradient-to-br from-primary to-primaryLight p-6 rounded-3xl text-white shadow-lg shadow-indigo-200 dark:shadow-none relative overflow-hidden">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-10 translate-x-10"></div>
+                            <h2 class="text-sm font-medium opacity-90 mb-1">Aktivitas Hari Ini</h2>
+                            <div class="flex items-end gap-2 mb-4">
+                                <span class="text-3xl font-bold">${completed}</span>
+                                <span class="text-sm opacity-80 mb-1">/ ${total} selesai</span>
                             </div>
-                            <button onclick="completeHabit('${h.ID}')" class="w-full py-2 bg-primary text-white rounded-lg text-sm font-medium">Selesaikan Hari Ini</button>
+                            <div class="w-full bg-white/30 rounded-full h-2 mb-2">
+                                <div class="bg-white h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${progress}%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs opacity-90 font-medium">
+                                <span>Progress</span>
+                                <span>${progress}%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-6 mt-2">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold">Jadwal</h3>
+                            <button onclick="app.navigate('schedule')" class="text-sm text-primary font-medium">Lihat Semua</button>
+                        </div>
+                `;
+
+                if (tasks.length === 0) {
+                    html += `
+                        <div class="flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-darkCard rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
+                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                                <i data-lucide="coffee" class="text-gray-400 w-8 h-8"></i>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-300 font-medium mb-1">Belum ada aktivitas hari ini</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Mulai rencanakan harimu.</p>
+                            <button onclick="app.openModal('task-modal', null, '${today}')" class="px-5 py-2.5 bg-primary/10 text-primary font-medium rounded-xl hover:bg-primary/20 transition-colors text-sm">
+                                + Tambah Jadwal
+                            </button>
                         </div>
                     `;
-                });
-            })
-            .getHabitStreaks(currentUser.Username);
-    }
+                } else {
+                    html += `<div class="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 dark:before:via-gray-700 before:to-transparent">`;
+                    
+                    tasks.forEach((task, index) => {
+                        const catStyle = utils.getCategoryColor(task.category);
+                        html += `
+                            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group animate-fade-in" style="animation-delay: ${index * 50}ms">
+                                
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-darkBg bg-gray-200 dark:bg-gray-700 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10 transition-colors ${task.completed ? '!bg-primary' : ''}">
+                                    ${task.completed ? '<i data-lucide="check" class="w-4 h-4 text-white"></i>' : '<div class="w-2.5 h-2.5 rounded-full bg-white dark:bg-gray-400"></div>'}
+                                </div>
+                                
+                                <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-darkCard p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 ml-4 md:ml-0 transition-all hover:shadow-md ${task.completed ? 'opacity-70' : ''}">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <div class="flex flex-col">
+                                            <span class="text-xs font-bold text-gray-400 dark:text-gray-500 mb-1">${task.startTime} ${task.endTime ? '- ' + task.endTime : ''}</span>
+                                            <h4 class="font-bold text-gray-800 dark:text-white text-base ${task.completed ? 'line-through decoration-2 decoration-gray-300' : ''}">${task.title}</h4>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button onclick="app.editTask('${task.id}')" class="p-1.5 text-gray-400 hover:text-primary transition-colors">
+                                                <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                            </button>
+                                            <input type="checkbox" class="custom-checkbox" ${task.completed ? 'checked' : ''} onchange="app.toggleTask('${task.id}', event)">
+                                        </div>
+                                    </div>
+                                    ${task.desc ? `<p class="text-sm text-gray-500 line-clamp-2 mt-1 mb-3">${task.desc}</p>` : '<div class="h-2"></div>'}
+                                    <span class="inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${catStyle}">${task.category}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
 
-    function toggleDarkMode() {
-        if(currentTheme === 'light') {
-            document.documentElement.classList.add('dark');
-            currentTheme = 'dark';
-        } else {
-            document.documentElement.classList.remove('dark');
-            currentTheme = 'light';
-        }
-    }
-</script>
+                html += `</div>`;
+                return html;
+            },
+
+            schedule: () => {
+                const today = new Date();
+                const monthName = today.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+                const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+                const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
+                
+                let calendarHtml = `<div class="grid grid-cols-7 gap-1 text-center mb-6">
+                    ${['M','S','S','R','K','J','S'].map(d => `<div class="text-xs font-medium text-gray-400 py-2">${d}</div>`).join('')}`;
+                
+                for (let i = 0; i < firstDay; i++) {
+                    calendarHtml += `<div></div>`;
+                }
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
+                    const hasTasks = store.getTasksByDate(dateStr).length > 0;
+                    const isToday = i === today.getDate();
+                    
+                    let bg = isToday ? 'bg-primary text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300';
+                    let indicator = hasTasks && !isToday ? '<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>' : '';
+                    
+                    calendarHtml += `
+                        <button onclick="views.renderDayTasks('${dateStr}')" class="relative w-full aspect-square rounded-full flex items-center justify-center text-sm ${bg} transition-colors">
+                            ${i}
+                            ${indicator}
+                        </button>
+                    `;
+                }
+                calendarHtml += `</div>`;
+
+                let html = `
+                    <div class="px-6 pt-12 pb-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h1 class="text-2xl font-bold tracking-tight">Jadwal</h1>
+                            <button onclick="app.openModal('task-modal')" class="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-lg">+ Tambah</button>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 mb-8">
+                            <div class="flex justify-between items-center mb-4">
+                                <h2 class="font-bold">${monthName}</h2>
+                                <div class="flex gap-2">
+                                    <button class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
+                                    <button class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+                            ${calendarHtml}
+                        </div>
+
+                        <div id="day-tasks-container">
+                            <!-- Tasks injected here -->
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => views.renderDayTasks(utils.getTodayStr()), 0);
+                return html;
+            },
+
+            renderDayTasks: (dateStr) => {
+                const container = document.getElementById('day-tasks-container');
+                if (!container) return;
+
+                const tasks = store.getTasksByDate(dateStr);
+                let displayDate = dateStr === utils.getTodayStr() ? 'Hari Ini' : utils.formatDateDisplay(dateStr);
+                
+                let html = `<h3 class="text-lg font-bold mb-4">${displayDate}</h3>`;
+                
+                if (tasks.length === 0) {
+                    html += `<p class="text-gray-500 text-sm italic text-center py-8">Tidak ada jadwal pada tanggal ini.</p>`;
+                } else {
+                    html += `<div class="space-y-3">`;
+                    tasks.forEach(task => {
+                        const catStyle = utils.getCategoryColor(task.category);
+                        html += `
+                            <div class="bg-white dark:bg-darkCard p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 items-center">
+                                <div class="flex flex-col items-center justify-center w-12 shrink-0 border-r border-gray-100 dark:border-gray-700 pr-4">
+                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200">${task.startTime.split(':')[0]}</span>
+                                    <span class="text-[10px] text-gray-400">${task.startTime.split(':')[1]}</span>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-gray-800 dark:text-white text-sm ${task.completed ? 'line-through text-gray-400' : ''}">${task.title}</h4>
+                                    <span class="inline-block px-2 py-0.5 mt-1 text-[9px] font-bold uppercase rounded-md ${catStyle}">${task.category}</span>
+                                </div>
+                                <div class="flex gap-2 shrink-0">
+                                     <button onclick="app.editTask('${task.id}')" class="p-2 text-gray-400 hover:text-primary bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors">
+                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                container.innerHTML = html;
+                lucide.createIcons();
+            },
+
+            habits: () => {
+                const habits = store.data.habits;
+                const today = utils.getTodayStr();
+
+                let html = `
+                    <div class="px-6 pt-12 pb-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <div>
+                                <h1 class="text-2xl font-bold tracking-tight">Habit Tracker</h1>
+                                <p class="text-sm text-gray-500 mt-1">Bangun rutinitas positif.</p>
+                            </div>
+                            <button onclick="app.openModal('habit-modal')" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-none hover:bg-indigo-700 transition-colors">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                `;
+
+                if (habits.length === 0) {
+                    html += `
+                        <div class="flex flex-col items-center justify-center py-16 px-4 text-center">
+                            <div class="w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center mb-6">
+                                <i data-lucide="leaf" class="text-emerald-500 w-10 h-10"></i>
+                            </div>
+                            <h3 class="text-lg font-bold mb-2">Belum ada habit</h3>
+                            <p class="text-gray-500 text-sm mb-6 max-w-[250px]">Mulai bangun kebiasaan baik pertamamu hari ini untuk hidup yang lebih produktif.</p>
+                            <button onclick="app.openModal('habit-modal')" class="px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-xl hover:scale-105 transition-transform shadow-lg">
+                                Buat Habit Baru
+                            </button>
+                        </div>
+                    `;
+                } else {
+                    html += `<div class="space-y-4">`;
+                    habits.forEach(habit => {
+                        const currentProgress = habit.history[today] || 0;
+                        const isDone = currentProgress >= habit.target;
+                        const streaks = utils.calculateStreak(habit);
+                        const colorHex = utils.getHabitColorHex(habit.color);
+
+                        let historyHtml = '<div class="flex justify-between mt-4 px-1">';
+                        for(let i=6; i>=0; i--) {
+                            let d = new Date();
+                            d.setDate(d.getDate() - i);
+                            const dStr = utils.formatDateId(d);
+                            const done = (habit.history[dStr] || 0) >= habit.target;
+                            const dayName = ['M','S','S','R','K','J','S'][d.getDay()];
+                            
+                            historyHtml += `
+                                <div class="flex flex-col items-center gap-1.5">
+                                    <span class="text-[10px] text-gray-400 font-medium">${dayName}</span>
+                                    <div class="w-6 h-6 rounded-full flex items-center justify-center text-xs transition-colors ${done ? 'text-white shadow-sm' : 'bg-gray-100 dark:bg-gray-700 text-transparent'}" style="${done ? `background-color: ${colorHex}` : ''}">
+                                        ${done ? '<i data-lucide="check" class="w-3 h-3"></i>' : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                        historyHtml += '</div>';
+
+                        html += `
+                            <div class="bg-white dark:bg-darkCard p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800">
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-sm" style="background-color: ${colorHex}">
+                                            <i data-lucide="${habit.icon}" class="w-6 h-6"></i>
+                                        </div>
+                                        <div>
+                                            <h3 class="font-bold text-gray-800 dark:text-white">${habit.title}</h3>
+                                            <div class="flex items-center gap-2 text-xs font-medium text-orange-500 mt-0.5">
+                                                <i data-lucide="flame" class="w-3.5 h-3.5 fill-current"></i>
+                                                <span>${streaks.current} hari streak</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        <button onclick="app.editHabit('${habit.id}')" class="p-2 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                            <i data-lucide="more-vertical" class="w-5 h-5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 flex items-center justify-between">
+                                    <div class="flex-1 mr-4">
+                                        <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                                            <span>Progress</span>
+                                            <span>${currentProgress} / ${habit.target} ${habit.unit}</span>
+                                        </div>
+                                        <div class="h-2.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                            <div class="h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, (currentProgress/habit.target)*100)}%; background-color: ${colorHex}"></div>
+                                        </div>
+                                    </div>
+                                    <button onclick="app.incrementHabit('${habit.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-sm border-2 ${isDone ? 'border-transparent text-white' : 'border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300'}" style="${isDone ? `background-color: ${colorHex}` : ''}">
+                                        <i data-lucide="${isDone ? 'check' : 'plus'}" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+
+                                ${historyHtml}
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
+                return html;
+            },
+
+            stats: () => {
+                const tasks = store.data.tasks;
+                const habits = store.data.habits;
+                
+                const totalTasks = tasks.length;
+                const completedTasks = tasks.filter(t => t.completed).length;
+                const completionRate = totalTasks ? Math.round((completedTasks/totalTasks)*100) : 0;
+
+                let bestOverallStreak = 0;
+                habits.forEach(h => {
+                    const s = utils.calculateStreak(h).best;
+                    if(s > bestOverallStreak) bestOverallStreak = s;
+                });
+
+                let html = `
+                    <div class="px-6 pt-12 pb-6">
+                        <h1 class="text-2xl font-bold tracking-tight mb-6">Statistik</h1>
+                        
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center justify-center">
+                                <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-primary rounded-full flex items-center justify-center mb-2">
+                                    <i data-lucide="check-square" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-3xl font-bold mb-1">${completedTasks}</span>
+                                <span class="text-xs font-medium text-gray-500">Tugas Selesai</span>
+                            </div>
+                            <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center justify-center">
+                                <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center mb-2">
+                                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                                </div>
+                                <span class="text-3xl font-bold mb-1">${completionRate}%</span>
+                                <span class="text-xs font-medium text-gray-500">Completion Rate</span>
+                            </div>
+                            <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center justify-center col-span-2">
+                                <div class="flex items-center gap-3 mb-2">
+                                     <i data-lucide="award" class="w-6 h-6 text-orange-500"></i>
+                                     <span class="text-lg font-bold">Best Habit Streak</span>
+                                </div>
+                                <div class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">${bestOverallStreak} <span class="text-sm font-bold text-gray-400">Hari</span></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white dark:bg-darkCard p-5 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm mb-6">
+                            <h3 class="font-bold mb-4 text-sm">Aktivitas 7 Hari Terakhir</h3>
+                            <div class="h-40 w-full relative">
+                                <canvas id="weeklyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    const ctx = document.getElementById('weeklyChart');
+                    if(ctx) {
+                        const labels = [];
+                        const data = [];
+                        for(let i=6; i>=0; i--) {
+                            let d = new Date();
+                            d.setDate(d.getDate() - i);
+                            labels.push(d.toLocaleDateString('id-ID', {weekday:'short'}));
+                            
+                            const dStr = utils.formatDateId(d);
+                            const doneCount = store.getTasksByDate(dStr).filter(t => t.completed).length;
+                            data.push(doneCount);
+                        }
+
+                        new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Tugas Selesai',
+                                    data: data,
+                                    backgroundColor: '#4F46E5',
+                                    borderRadius: 6,
+                                    barThickness: 12
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    y: { beginAtZero: true, ticks: { stepSize: 1, color: '#9ca3af' }, grid: { color: 'rgba(156, 163, 175, 0.1)' } },
+                                    x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                                }
+                            }
+                        });
+                    }
+                }, 100);
+
+                return html;
+            },
+
+            settings: () => {
+                const s = store.data.settings;
+                let html = `
+                    <div class="px-6 pt-12 pb-6">
+                        <div class="flex items-center gap-3 mb-8">
+                            <button onclick="app.navigate('home')" class="p-2 -ml-2 text-gray-500 hover:text-gray-800 dark:hover:text-white transition-colors">
+                                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                            </button>
+                            <h1 class="text-2xl font-bold tracking-tight">Pengaturan</h1>
+                        </div>
+
+                        <div class="space-y-6">
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Database Status</h3>
+                                <div class="bg-white dark:bg-darkCard rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm p-4 flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-500 shrink-0">
+                                        <i data-lucide="cloud-lightning" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-sm text-gray-800 dark:text-white">Online Database Aktif</h4>
+                                        <p class="text-xs text-gray-500 mt-0.5">Semua perubahan Anda kini otomatis tersimpan ke Google Sheets secara real-time.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Tampilan</h3>
+                                <div class="bg-white dark:bg-darkCard rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                                    <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="moon" class="w-4 h-4 text-gray-600 dark:text-gray-300"></i></div>
+                                            <span class="font-medium">Tema Gelap</span>
+                                        </div>
+                                        <select onchange="app.changeTheme(this.value)" class="bg-transparent text-sm font-medium text-gray-500 outline-none text-right appearance-none cursor-pointer">
+                                            <option value="light" ${s.theme==='light'?'selected':''}>Light</option>
+                                            <option value="dark" ${s.theme==='dark'?'selected':''}>Dark</option>
+                                            <option value="system" ${s.theme==='system'?'selected':''}>System</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Data</h3>
+                                <div class="bg-white dark:bg-darkCard rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
+                                    <button onclick="app.exportData()" class="w-full flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                            <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500"><i data-lucide="download" class="w-4 h-4"></i></div>
+                                            <span class="font-medium">Backup Data</span>
+                                        </div>
+                                    </button>
+                                    <button onclick="app.clearData()" class="w-full flex items-center justify-between p-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors group">
+                                        <div class="flex items-center gap-3 text-red-500">
+                                            <div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></div>
+                                            <span class="font-medium">Hapus Semua Data</span>
+                                        </div>
+                                    </button>
+                                </div>
+                                <p class="text-[10px] text-gray-400 text-center mt-4">Data disimpan secara lokal di perangkat ini.</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return html;
+            }
+        };
+
+        // --- STREAMING_CHUNK:App Core controller, logic, and Cloud Sync implementation... ---
+        const app = {
+            currentView: 'home',
+            
+            init: async () => {
+                ui.applyTheme();
+                app.setupNav();
+                app.setupModals();
+                app.setupForms();
+                app.setupIconSelectors();
+                
+                // Loading screen untuk menarik data dari database saat aplikasi baru dibuka
+                if (CONFIG.GAS_URL && CONFIG.GAS_URL !== 'MASUKKAN_URL_GAS_ANDA_DISINI') {
+                    document.getElementById('main-content').innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full mt-20">
+                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-4"></div>
+                            <p class="text-sm text-gray-500 font-medium">Sinkronisasi Database...</p>
+                        </div>`;
+                    await app.autoLoadFromCloud();
+                }
+
+                app.navigate('home');
+
+                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+                    if (store.data.settings.theme === 'system') ui.applyTheme();
+                });
+            },
+
+            navigate: (viewName) => {
+                const content = document.getElementById('main-content');
+                content.style.opacity = '0';
+                
+                setTimeout(() => {
+                    content.innerHTML = views[viewName]();
+                    app.currentView = viewName;
+                    
+                    document.querySelectorAll('.nav-item').forEach(el => {
+                        const icon = el.querySelector('i');
+                        const span = el.querySelector('span');
+                        if (el.dataset.target === viewName) {
+                            el.classList.remove('text-slate-400', 'dark:text-slate-500');
+                            el.classList.add('text-primary');
+                            span.classList.add('font-bold');
+                            icon.classList.add('animate-pop');
+                            setTimeout(() => icon.classList.remove('animate-pop'), 300);
+                        } else {
+                            el.classList.remove('text-primary');
+                            el.classList.add('text-slate-400', 'dark:text-slate-500');
+                            span.classList.remove('font-bold');
+                        }
+                    });
+
+                    const nav = document.querySelector('nav');
+                    const fab = document.getElementById('fab-btn');
+                    if(viewName === 'settings') {
+                        nav.classList.add('hidden');
+                        fab.classList.add('hidden');
+                    } else {
+                        nav.classList.remove('hidden');
+                        fab.classList.remove('hidden');
+                    }
+
+                    lucide.createIcons();
+                    
+                    content.style.transition = 'opacity 0.2s ease-in';
+                    content.style.opacity = '1';
+                }, 150);
+            },
+
+            setupNav: () => {
+                document.querySelectorAll('.nav-item').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const target = e.currentTarget.dataset.target;
+                        if(app.currentView !== target) app.navigate(target);
+                    });
+                });
+            },
+
+            setupModals: () => {
+                const overlay = document.getElementById('overlay');
+                const quickAdd = document.getElementById('quick-add-sheet');
+                const fab = document.getElementById('fab-btn');
+
+                const closeAll = () => {
+                    overlay.classList.add('opacity-0');
+                    quickAdd.classList.add('translate-y-full');
+                    
+                    ['task-modal', 'habit-modal'].forEach(id => {
+                        const m = document.getElementById(id);
+                        m.classList.add('opacity-0');
+                        m.children[0].classList.add('sm:scale-95'); 
+                        if(window.innerWidth < 640) m.children[0].classList.add('translate-y-full');
+                        
+                        setTimeout(() => m.classList.add('hidden'), 300);
+                    });
+
+                    setTimeout(() => overlay.classList.add('hidden'), 300);
+                };
+
+                fab.addEventListener('click', () => {
+                    overlay.classList.remove('hidden');
+                    setTimeout(() => {
+                        overlay.classList.remove('opacity-0');
+                        quickAdd.classList.remove('translate-y-full');
+                    }, 10);
+                });
+
+                overlay.addEventListener('click', closeAll);
+                document.querySelectorAll('.close-modal-btn').forEach(btn => {
+                    btn.addEventListener('click', closeAll);
+                });
+
+                app.closeModals = closeAll;
+            },
+
+            openModal: (modalId, dataId = null, defaultDate = null) => {
+                document.getElementById('quick-add-sheet').classList.add('translate-y-full');
+                
+                const modal = document.getElementById(modalId);
+                const overlay = document.getElementById('overlay');
+                
+                overlay.classList.remove('hidden');
+                modal.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    overlay.classList.remove('opacity-0');
+                    modal.classList.remove('opacity-0');
+                    modal.children[0].classList.remove('sm:scale-95');
+                    if(window.innerWidth < 640) modal.children[0].classList.remove('translate-y-full');
+                }, 10);
+
+                if (modalId === 'task-modal') {
+                    const form = document.getElementById('task-form');
+                    form.reset();
+                    document.getElementById('task-id').value = '';
+                    document.getElementById('task-date').value = defaultDate || utils.getTodayStr();
+                    
+                    const now = new Date();
+                    document.getElementById('task-start-time').value = `${String(now.getHours()).padStart(2,'0')}:00`;
+                    document.getElementById('task-modal-title').textContent = 'Tambah Jadwal';
+
+                    if (dataId) {
+                        const task = store.data.tasks.find(t => t.id === dataId);
+                        if(task) {
+                            document.getElementById('task-id').value = task.id;
+                            document.getElementById('task-title').value = task.title;
+                            document.getElementById('task-date').value = task.date;
+                            document.getElementById('task-category').value = task.category;
+                            document.getElementById('task-start-time').value = task.startTime;
+                            document.getElementById('task-end-time').value = task.endTime;
+                            document.getElementById('task-desc').value = task.desc;
+                            document.getElementById('task-modal-title').textContent = 'Edit Jadwal';
+                            
+                            if(!document.getElementById('delete-task-btn')) {
+                                const delBtn = document.createElement('button');
+                                delBtn.id = 'delete-task-btn';
+                                delBtn.type = 'button';
+                                delBtn.className = 'w-full mt-2 text-red-500 font-medium py-3 rounded-xl hover:bg-red-50 transition-colors';
+                                delBtn.innerText = 'Hapus Jadwal';
+                                delBtn.onclick = () => {
+                                    ui.confirm('Hapus Jadwal', `Yakin ingin menghapus "${task.title}"?`, () => {
+                                        store.deleteTask(task.id);
+                                        app.closeModals();
+                                        app.refreshCurrentView();
+                                        ui.toast('Jadwal dihapus');
+                                    });
+                                };
+                                form.appendChild(delBtn);
+                            }
+                        }
+                    } else {
+                        const delBtn = document.getElementById('delete-task-btn');
+                        if(delBtn) delBtn.remove();
+                    }
+                } 
+                else if (modalId === 'habit-modal') {
+                    const form = document.getElementById('habit-form');
+                    form.reset();
+                    document.getElementById('habit-id').value = '';
+                    app.selectIcon('check-circle');
+                    app.selectColor('blue');
+                    document.getElementById('habit-modal-title').textContent = 'Tambah Habit';
+
+                    if (dataId) {
+                        const habit = store.data.habits.find(h => h.id === dataId);
+                        if(habit) {
+                            document.getElementById('habit-id').value = habit.id;
+                            document.getElementById('habit-title').value = habit.title;
+                            document.getElementById('habit-target').value = habit.target;
+                            document.getElementById('habit-unit').value = habit.unit;
+                            app.selectIcon(habit.icon);
+                            app.selectColor(habit.color);
+                            document.getElementById('habit-modal-title').textContent = 'Edit Habit';
+
+                            if(!document.getElementById('delete-habit-btn')) {
+                                const delBtn = document.createElement('button');
+                                delBtn.id = 'delete-habit-btn';
+                                delBtn.type = 'button';
+                                delBtn.className = 'w-full mt-2 text-red-500 font-medium py-3 rounded-xl hover:bg-red-50 transition-colors';
+                                delBtn.innerText = 'Hapus Habit';
+                                delBtn.onclick = () => {
+                                    ui.confirm('Hapus Habit', `Semua progress "${habit.title}" akan hilang. Lanjutkan?`, () => {
+                                        store.deleteHabit(habit.id);
+                                        app.closeModals();
+                                        app.refreshCurrentView();
+                                        ui.toast('Habit dihapus');
+                                    });
+                                };
+                                form.appendChild(delBtn);
+                            }
+                        }
+                    } else {
+                        const delBtn = document.getElementById('delete-habit-btn');
+                        if(delBtn) delBtn.remove();
+                    }
+                }
+            },
+
+            setupForms: () => {
+                document.getElementById('task-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('task-id').value;
+                    const taskData = {
+                        title: document.getElementById('task-title').value,
+                        date: document.getElementById('task-date').value,
+                        category: document.getElementById('task-category').value,
+                        startTime: document.getElementById('task-start-time').value,
+                        endTime: document.getElementById('task-end-time').value,
+                        desc: document.getElementById('task-desc').value
+                    };
+
+                    if (id) {
+                        taskData.id = id;
+                        store.updateTask(taskData);
+                        ui.toast('Jadwal diperbarui');
+                    } else {
+                        store.addTask(taskData);
+                        ui.toast('Jadwal ditambahkan');
+                    }
+                    app.closeModals();
+                    app.refreshCurrentView();
+                });
+
+                document.getElementById('habit-form').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const id = document.getElementById('habit-id').value;
+                    const habitData = {
+                        title: document.getElementById('habit-title').value,
+                        target: parseInt(document.getElementById('habit-target').value),
+                        unit: document.getElementById('habit-unit').value,
+                        icon: document.getElementById('habit-icon').value,
+                        color: document.getElementById('habit-color').value
+                    };
+
+                    if (id) {
+                        habitData.id = id;
+                        store.updateHabit(habitData);
+                        ui.toast('Habit diperbarui');
+                    } else {
+                        store.addHabit(habitData);
+                        ui.toast('Habit ditambahkan');
+                    }
+                    app.closeModals();
+                    app.refreshCurrentView();
+                });
+            },
+
+            setupIconSelectors: () => {
+                const icons = ['check-circle', 'droplet', 'book', 'dumbbell', 'moon', 'sun', 'coffee', 'heart', 'code', 'pen-tool', 'music', 'smile'];
+                const colors = ['blue', 'emerald', 'pink', 'amber', 'purple', 'red'];
+                
+                const iconContainer = document.getElementById('icon-selector');
+                icons.forEach(icon => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'p-3 rounded-xl flex items-center justify-center border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors icon-btn';
+                    btn.dataset.icon = icon;
+                    btn.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 text-gray-500"></i>`;
+                    btn.onclick = () => app.selectIcon(icon);
+                    iconContainer.appendChild(btn);
+                });
+
+                const colorContainer = document.getElementById('color-selector');
+                colors.forEach(color => {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = `w-8 h-8 rounded-full border-2 border-transparent flex items-center justify-center color-btn transition-transform`;
+                    btn.style.backgroundColor = utils.getHabitColorHex(color);
+                    btn.dataset.color = color;
+                    btn.onclick = () => app.selectColor(color);
+                    colorContainer.appendChild(btn);
+                });
+            },
+
+            selectIcon: (iconName) => {
+                document.getElementById('habit-icon').value = iconName;
+                document.querySelectorAll('.icon-btn').forEach(btn => {
+                    if (btn.dataset.icon === iconName) {
+                        btn.classList.add('bg-indigo-50', 'dark:bg-indigo-900/30', 'border-indigo-200', 'dark:border-indigo-700');
+                        btn.querySelector('i').classList.replace('text-gray-500', 'text-primary');
+                    } else {
+                        btn.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/30', 'border-indigo-200', 'dark:border-indigo-700');
+                        btn.querySelector('i').classList.replace('text-primary', 'text-gray-500');
+                    }
+                });
+            },
+
+            selectColor: (colorName) => {
+                document.getElementById('habit-color').value = colorName;
+                document.querySelectorAll('.color-btn').forEach(btn => {
+                    if (btn.dataset.color === colorName) {
+                        btn.classList.add('scale-110', 'ring-2', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-darkCard', 'ring-gray-400');
+                    } else {
+                        btn.classList.remove('scale-110', 'ring-2', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-darkCard', 'ring-gray-400');
+                    }
+                });
+            },
+
+            toggleTask: (id, event) => {
+                const isCompleted = store.toggleTask(id);
+                const card = event.target.closest('.bg-white, .dark\\:bg-darkCard');
+                const title = card.querySelector('h4');
+                const dot = card.previousElementSibling; 
+                
+                if (isCompleted) {
+                    card.classList.add('opacity-70');
+                    title.classList.add('line-through', 'decoration-2', 'decoration-gray-300');
+                    dot.classList.add('!bg-primary');
+                    dot.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-white"></i>';
+                    lucide.createIcons();
+                } else {
+                    card.classList.remove('opacity-70');
+                    title.classList.remove('line-through', 'decoration-2', 'decoration-gray-300');
+                    dot.classList.remove('!bg-primary');
+                    dot.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-white dark:bg-gray-400"></div>';
+                }
+                
+                if(app.currentView === 'home') {
+                   setTimeout(() => app.refreshCurrentView(), 500); 
+                }
+            },
+
+            editTask: (id) => app.openModal('task-modal', id),
+            
+            editHabit: (id) => app.openModal('habit-modal', id),
+
+            incrementHabit: (id) => {
+                const result = store.updateHabitProgress(id, utils.getTodayStr());
+                app.refreshCurrentView();
+                
+                if (result.completed && result.progress === store.data.habits.find(h=>h.id===id).target) {
+                    ui.toast('Target habit tercapai! 🎉');
+                }
+            },
+
+            changeTheme: (themeStr) => {
+                store.data.settings.theme = themeStr;
+                store.save();
+                ui.applyTheme();
+            },
+
+            clearData: () => {
+                ui.confirm('Hapus Semua Data', 'Semua jadwal, habit, dan pengaturan akan dihapus permanen.', () => {
+                    localStorage.removeItem(StorageKey);
+                    location.reload();
+                });
+            },
+
+            exportData: () => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store.data));
+                const dlAnchorElem = document.createElement('a');
+                dlAnchorElem.setAttribute("href", dataStr);
+                dlAnchorElem.setAttribute("download", "myschedule_backup.json");
+                dlAnchorElem.click();
+                ui.toast('Data berhasil diekspor');
+            },
+
+            // --- STREAMING_CHUNK:Database Auto Sync Logic... ---
+            autoLoadFromCloud: async () => {
+                try {
+                    const response = await fetch(CONFIG.GAS_URL);
+                    const cloudData = await response.json();
+                    
+                    if (cloudData && cloudData.tasks && cloudData.settings) {
+                        store.data = cloudData;
+                        // Simpan ke local tanpa trigger setTimeout save()
+                        localStorage.setItem(StorageKey, JSON.stringify(store.data));
+                        ui.applyTheme();
+                    }
+                } catch (error) {
+                    console.error("Gagal load dari cloud:", error);
+                    ui.toast('Gagal konek ke database. Memakai data lokal.', 'error');
+                }
+            },
+
+            refreshCurrentView: () => {
+                app.navigate(app.currentView);
+            }
+        };
+
+        // Start App
+        document.addEventListener('DOMContentLoaded', app.init);
+
+    </script>
 </body>
 </html>
