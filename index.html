@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>My Schedule</title>
     
-    <!-- Fonts -->
+    <!-- Fonts: Inter (Premium Modern Font) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,30 +28,35 @@
                         sans: ['Inter', 'sans-serif'],
                     },
                     colors: {
-                        primary: '#4F46E5', // Indigo 600
-                        primaryLight: '#818CF8', // Indigo 400
-                        darkBg: '#0f172a', // Slate 900
-                        darkCard: '#1e293b', // Slate 800
+                        primary: '#6366f1', // Indigo 500
+                        primaryLight: '#818cf8', // Indigo 400
+                        darkBg: '#09090b', // Zinc 950
+                        darkCard: '#18181b', // Zinc 900
+                        lightBg: '#f4f4f5', // Zinc 100
                     },
                     animation: {
-                        'slide-up': 'slideUp 0.3s ease-out',
-                        'fade-in': 'fadeIn 0.2s ease-out',
+                        'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                        'fade-in': 'fadeIn 0.3s ease-out',
                         'pop': 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                     },
                     keyframes: {
                         slideUp: {
-                            '0%': { transform: 'translateY(100%)' },
-                            '100%': { transform: 'translateY(0)' },
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
                         },
                         fadeIn: {
-                            '0%': { opacity: '0' },
-                            '100%': { opacity: '1' },
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
                         },
                         pop: {
                             '0%': { transform: 'scale(0.95)' },
-                            '50%': { transform: 'scale(1.05)' },
+                            '50%': { transform: 'scale(1.08)' },
                             '100%': { transform: 'scale(1)' },
                         }
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 40px -10px rgba(0,0,0,0.08)',
+                        'glow': '0 0 20px -5px var(--tw-shadow-color)',
                     }
                 }
             }
@@ -59,77 +64,41 @@
     </script>
 
     <style>
-        /* Custom Scrollbar for a cleaner look */
-        ::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #475569;
-        }
-
         body {
             -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none; /* Prevent pull-to-refresh on mobile */
+            overscroll-behavior-y: none;
+            background-color: #f4f4f5;
         }
+        .dark body { background-color: #09090b; }
 
-        /* Hide scrollbar for main content area to look like native app */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Smooth transitions */
-        .transition-all-smooth {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        .transition-all-smooth { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
 
-        /* Safe Area untuk Mobile (iOS/Android) */
-        .pb-safe {
-            padding-bottom: 0.75rem; /* fallback */
-        }
-        @supports (padding-bottom: env(safe-area-inset-bottom)) {
-            .pb-safe {
-                padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));
-            }
-        }
-
-        /* Checkbox custom styling */
+        /* Custom Checkbox Premium */
         .custom-checkbox {
             appearance: none;
             background-color: transparent;
             margin: 0;
-            font: inherit;
             color: currentColor;
             width: 1.5em;
             height: 1.5em;
-            border: 2px solid #cbd5e1;
-            border-radius: 0.5em;
+            border: 2px solid #d4d4d8;
+            border-radius: 0.4em;
             display: grid;
             place-content: center;
             transition: all 0.2s ease-in-out;
             cursor: pointer;
         }
-        .dark .custom-checkbox {
-            border-color: #475569;
-        }
+        .dark .custom-checkbox { border-color: #3f3f46; }
         
         .custom-checkbox::before {
             content: "";
             width: 0.8em;
             height: 0.8em;
             transform: scale(0);
-            transition: 120ms transform ease-in-out;
+            transition: 120ms transform cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: inset 1em 1em white;
             background-color: white;
             transform-origin: center;
@@ -137,108 +106,107 @@
         }
 
         .custom-checkbox:checked {
-            background-color: #4F46E5;
-            border-color: #4F46E5;
+            background-color: #6366f1;
+            border-color: #6366f1;
         }
+        .custom-checkbox:checked::before { transform: scale(1); }
 
-        .custom-checkbox:checked::before {
-            transform: scale(1);
+        /* Glassmorphism Premium */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
         }
-
-        /* Glassmorphism for Bottom Nav */
+        .dark .glass-card {
+            background: rgba(24, 24, 27, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
         .glass-nav {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid rgba(226, 232, 240, 0.6);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
         }
         .dark .glass-nav {
-            background: rgba(15, 23, 42, 0.8);
-            border-top: 1px solid rgba(30, 41, 59, 0.6);
+            background: rgba(24, 24, 27, 0.9);
         }
 
-        /* Floating App Container for Desktop */
+        /* Desktop Container */
         @media (min-width: 640px) {
-            body {
-                background-color: #f1f5f9;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-            }
-            .dark body {
-                background-color: #020617;
-            }
+            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
             #app-container {
-                width: 100%;
-                max-width: 420px;
-                height: 90vh;
-                max-height: 850px;
-                border-radius: 2rem;
-                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-                overflow: hidden;
-                position: relative;
+                width: 100%; max-width: 400px; height: 90vh; max-height: 850px;
+                border-radius: 2.5rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border: 8px solid #e4e4e7; position: relative;
             }
+            .dark #app-container { border-color: #27272a; }
         }
     </style>
 </head>
-<body class="bg-white dark:bg-darkBg text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<body class="text-zinc-900 dark:text-zinc-100 transition-colors duration-300">
 
-    <div id="app-container" class="flex flex-col h-screen h-[100dvh] w-full relative bg-gray-50 dark:bg-darkBg overflow-hidden sm:overflow-visible">
+    <div id="app-container" class="flex flex-col h-screen h-[100dvh] w-full relative bg-lightBg dark:bg-darkBg overflow-hidden sm:overflow-visible">
         
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-28 relative">
-            <!-- Views will be injected here via JavaScript -->
+        <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-32 relative">
+            <!-- Views injected via JS -->
         </main>
 
-        <!-- Floating Action Button (FAB) -->
-        <button id="fab-btn" class="fixed sm:absolute bottom-20 right-6 w-14 h-14 bg-primary hover:bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-200 dark:shadow-indigo-900/50 flex items-center justify-center transition-all-smooth z-40 active:scale-95">
-            <i data-lucide="plus" class="w-7 h-7"></i>
-        </button>
-
-        <!-- Bottom Navigation -->
-        <nav class="fixed sm:absolute bottom-0 w-full glass-nav z-30 px-6 py-3 pb-safe">
-            <div class="flex justify-between items-center max-w-md mx-auto">
-                <button class="nav-item flex flex-col items-center p-2 text-primary" data-target="home">
-                    <i data-lucide="home" class="w-6 h-6 mb-1"></i>
-                    <span class="text-[10px] font-medium">Home</span>
+        <!-- Floating Bottom Navigation -->
+        <div id="bottom-nav-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[360px] z-30 transition-transform duration-300">
+            <nav class="glass-nav rounded-3xl px-2 py-2 shadow-2xl border border-zinc-200/50 dark:border-zinc-800/80 flex justify-between items-center relative">
+                
+                <button class="nav-item flex-1 flex flex-col items-center p-2 text-primary group" data-target="home">
+                    <i data-lucide="layout-grid" class="w-6 h-6 mb-1 transition-transform group-active:scale-90"></i>
+                    <span class="text-[10px] font-semibold">Home</span>
                 </button>
-                <button class="nav-item flex flex-col items-center p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" data-target="schedule">
-                    <i data-lucide="calendar" class="w-6 h-6 mb-1"></i>
+                
+                <button class="nav-item flex-1 flex flex-col items-center p-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 group transition-colors" data-target="schedule">
+                    <i data-lucide="calendar" class="w-6 h-6 mb-1 transition-transform group-active:scale-90"></i>
                     <span class="text-[10px] font-medium">Jadwal</span>
                 </button>
-                <div class="w-10"></div> <!-- Space for FAB -->
-                <button class="nav-item flex flex-col items-center p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" data-target="habits">
-                    <i data-lucide="check-circle-2" class="w-6 h-6 mb-1"></i>
+                
+                <!-- Floating Action Button (Integrated in Nav) -->
+                <div class="flex-1 flex justify-center relative">
+                    <button id="fab-btn" class="absolute -top-10 w-14 h-14 bg-primary hover:bg-indigo-600 text-white rounded-full shadow-lg shadow-indigo-500/40 flex items-center justify-center transition-transform active:scale-90 border-[4px] border-lightBg dark:border-darkBg z-40">
+                        <i data-lucide="plus" class="w-7 h-7"></i>
+                    </button>
+                </div>
+
+                <button class="nav-item flex-1 flex flex-col items-center p-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 group transition-colors" data-target="habits">
+                    <i data-lucide="sparkles" class="w-6 h-6 mb-1 transition-transform group-active:scale-90"></i>
                     <span class="text-[10px] font-medium">Habit</span>
                 </button>
-                <button class="nav-item flex flex-col items-center p-2 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" data-target="stats">
-                    <i data-lucide="bar-chart-2" class="w-6 h-6 mb-1"></i>
+                
+                <button class="nav-item flex-1 flex flex-col items-center p-2 text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 group transition-colors" data-target="stats">
+                    <i data-lucide="bar-chart-2" class="w-6 h-6 mb-1 transition-transform group-active:scale-90"></i>
                     <span class="text-[10px] font-medium">Statistik</span>
                 </button>
-            </div>
-        </nav>
+                
+            </nav>
+        </div>
 
         <!-- Overlay -->
-        <div id="overlay" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 hidden opacity-0 transition-opacity duration-300"></div>
+        <div id="overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden opacity-0 transition-all duration-300"></div>
 
         <!-- Quick Add Bottom Sheet -->
-        <div id="quick-add-sheet" class="fixed bottom-0 left-0 right-0 sm:absolute sm:bottom-0 bg-white dark:bg-darkCard rounded-t-3xl z-50 transform translate-y-full transition-transform duration-300 shadow-2xl hidden">
-            <div class="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3 mb-6"></div>
-            <div class="px-6 pb-10">
-                <h3 class="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Buat Baru</h3>
+        <div id="quick-add-sheet" class="fixed bottom-0 left-0 right-0 sm:absolute sm:bottom-0 bg-white dark:bg-darkCard rounded-t-[2rem] z-50 transform translate-y-full transition-transform duration-300 shadow-2xl hidden">
+            <div class="w-12 h-1.5 bg-zinc-200 dark:bg-zinc-800 rounded-full mx-auto mt-4 mb-6"></div>
+            <div class="px-6 pb-12">
+                <h3 class="text-xl font-bold mb-6 text-center text-zinc-800 dark:text-white">Buat Baru</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <button onclick="app.openModal('task-modal')" class="flex flex-col items-center justify-center p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-800/50 hover:bg-indigo-100 transition-colors">
-                        <div class="w-12 h-12 bg-white dark:bg-indigo-800 rounded-full flex items-center justify-center shadow-sm mb-3">
-                            <i data-lucide="calendar-plus" class="text-primary w-6 h-6"></i>
+                    <button onclick="app.openModal('task-modal')" class="group flex flex-col items-center justify-center p-5 bg-indigo-50 dark:bg-indigo-500/10 rounded-3xl border border-indigo-100 dark:border-indigo-500/20 hover:bg-indigo-100 transition-all active:scale-95">
+                        <div class="w-14 h-14 bg-white dark:bg-indigo-600/20 rounded-2xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="calendar-plus" class="text-primary w-7 h-7"></i>
                         </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Jadwal</span>
+                        <span class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Jadwal</span>
                     </button>
-                    <button onclick="app.openModal('habit-modal')" class="flex flex-col items-center justify-center p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl border border-emerald-100 dark:border-emerald-800/50 hover:bg-emerald-100 transition-colors">
-                        <div class="w-12 h-12 bg-white dark:bg-emerald-800 rounded-full flex items-center justify-center shadow-sm mb-3">
-                            <i data-lucide="sparkles" class="text-emerald-500 w-6 h-6"></i>
+                    <button onclick="app.openModal('habit-modal')" class="group flex flex-col items-center justify-center p-5 bg-emerald-50 dark:bg-emerald-500/10 rounded-3xl border border-emerald-100 dark:border-emerald-500/20 hover:bg-emerald-100 transition-all active:scale-95">
+                        <div class="w-14 h-14 bg-white dark:bg-emerald-600/20 rounded-2xl flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                            <i data-lucide="sparkles" class="text-emerald-500 w-7 h-7"></i>
                         </div>
-                        <span class="text-sm font-medium text-gray-700 dark:text-gray-200">Habit</span>
+                        <span class="text-sm font-semibold text-zinc-700 dark:text-zinc-300">Habit Tracker</span>
                     </button>
                 </div>
             </div>
@@ -246,27 +214,44 @@
 
         <!-- Task Form Modal -->
         <div id="task-modal" class="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 hidden opacity-0 transition-opacity duration-300">
-            <div class="bg-white dark:bg-darkCard w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto transform sm:scale-95 transition-transform duration-300 p-6 absolute bottom-0 sm:relative">
+            <div class="bg-white dark:bg-darkCard w-full sm:max-w-md rounded-t-[2rem] sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto transform sm:scale-95 transition-transform duration-300 p-6 absolute bottom-0 sm:relative">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xl font-bold" id="task-modal-title">Tambah Jadwal</h3>
-                    <button class="close-modal-btn p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-gray-800 dark:hover:text-white">
+                    <button class="close-modal-btn p-2 bg-zinc-100 dark:bg-zinc-800/50 rounded-full text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
                 <form id="task-form" class="space-y-4">
                     <input type="hidden" id="task-id">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nama Aktivitas</label>
-                        <input type="text" id="task-title" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary dark:focus:border-primary transition-colors" placeholder="Cth: Meeting Tim, Olahraga">
+                        <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Nama Aktivitas</label>
+                        <input type="text" id="task-title" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-medium" placeholder="Cth: Meeting Tim, Olahraga">
                     </div>
+                    
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Tanggal</label>
-                            <input type="date" id="task-date" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
+                            <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Mulai Dari</label>
+                            <input type="date" id="task-date" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary transition-all text-sm font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kategori</label>
-                            <select id="task-category" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm appearance-none">
+                            <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Pengulangan</label>
+                            <select id="task-repeat" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary transition-all text-sm font-medium appearance-none">
+                                <option value="none">Tidak Berulang</option>
+                                <option value="daily">Setiap Hari</option>
+                                <option value="weekly">Setiap Minggu</option>
+                                <option value="monthly">Setiap Bulan</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Jam Mulai</label>
+                            <input type="time" id="task-start-time" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary transition-all text-sm font-medium">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Kategori</label>
+                            <select id="task-category" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary transition-all text-sm font-medium appearance-none">
                                 <option value="personal">Pribadi</option>
                                 <option value="work">Pekerjaan</option>
                                 <option value="health">Kesehatan</option>
@@ -274,22 +259,12 @@
                             </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Mulai</label>
-                            <input type="time" id="task-start-time" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Selesai</label>
-                            <input type="time" id="task-end-time" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
-                        </div>
-                    </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Catatan (Opsional)</label>
-                        <textarea id="task-desc" rows="2" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors resize-none text-sm" placeholder="Tambahkan detail..."></textarea>
+                        <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Catatan (Opsional)</label>
+                        <textarea id="task-desc" rows="2" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3 outline-none focus:border-primary transition-all resize-none text-sm font-medium" placeholder="Tambahkan detail..."></textarea>
                     </div>
-                    <div class="pt-2">
-                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-3.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-[0.98]">Simpan Jadwal</button>
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-600 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-indigo-500/30 transition-all active:scale-[0.98]">Simpan Jadwal</button>
                     </div>
                 </form>
             </div>
@@ -297,89 +272,78 @@
 
         <!-- Habit Form Modal -->
         <div id="habit-modal" class="fixed inset-x-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center z-50 hidden opacity-0 transition-opacity duration-300">
-            <div class="bg-white dark:bg-darkCard w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto transform sm:scale-95 transition-transform duration-300 p-6 absolute bottom-0 sm:relative">
+            <div class="bg-white dark:bg-darkCard w-full sm:max-w-md rounded-t-[2rem] sm:rounded-3xl shadow-2xl max-h-[90vh] overflow-y-auto transform sm:scale-95 transition-transform duration-300 p-6 absolute bottom-0 sm:relative">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-xl font-bold" id="habit-modal-title">Tambah Habit</h3>
-                    <button class="close-modal-btn p-2 bg-gray-100 dark:bg-gray-800 rounded-full text-gray-500 hover:text-gray-800 dark:hover:text-white">
+                    <button class="close-modal-btn p-2 bg-zinc-100 dark:bg-zinc-800/50 rounded-full text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
                         <i data-lucide="x" class="w-5 h-5"></i>
                     </button>
                 </div>
-                <form id="habit-form" class="space-y-4">
+                <form id="habit-form" class="space-y-5">
                     <input type="hidden" id="habit-id">
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nama Habit</label>
-                        <input type="text" id="habit-title" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors" placeholder="Cth: Minum Air, Membaca 10 Hal">
+                        <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Nama Habit</label>
+                        <input type="text" id="habit-title" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary transition-all font-medium" placeholder="Cth: Minum Air, Membaca Buku">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Target (per hari)</label>
-                            <input type="number" id="habit-target" min="1" value="1" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
+                            <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Target Harian</label>
+                            <input type="number" id="habit-target" min="1" value="1" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary transition-all text-sm font-medium">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Satuan</label>
-                            <input type="text" id="habit-unit" value="kali" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm" placeholder="kali, menit, gelas">
+                            <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-1.5 uppercase tracking-wide">Satuan</label>
+                            <input type="text" id="habit-unit" value="kali" class="w-full bg-zinc-50 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-2xl px-4 py-3.5 outline-none focus:border-primary transition-all text-sm font-medium" placeholder="kali, menit, liter">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Pilih Ikon</label>
-                        <div class="grid grid-cols-6 gap-2" id="icon-selector">
-                            <!-- Icons injected via JS -->
-                        </div>
+                        <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wide">Ikon</label>
+                        <div class="grid grid-cols-6 gap-2" id="icon-selector"></div>
                         <input type="hidden" id="habit-icon" value="check-circle">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Warna</label>
-                        <div class="flex gap-3" id="color-selector">
-                            <!-- Colors injected via JS -->
-                        </div>
+                        <label class="block text-xs font-semibold text-zinc-500 dark:text-zinc-400 mb-2 uppercase tracking-wide">Warna Tema</label>
+                        <div class="flex gap-3" id="color-selector"></div>
                         <input type="hidden" id="habit-color" value="blue">
                     </div>
-                    <div class="pt-2">
-                        <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-3.5 rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all active:scale-[0.98]">Simpan Habit</button>
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-primary hover:bg-indigo-600 text-white font-semibold py-4 rounded-2xl shadow-lg shadow-indigo-500/30 transition-all active:scale-[0.98]">Simpan Habit</button>
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- Confirmation Dialog -->
-        <div id="confirm-dialog" class="fixed inset-0 z-[60] flex items-center justify-center hidden opacity-0 transition-opacity">
-            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm confirm-overlay"></div>
-            <div class="bg-white dark:bg-darkCard w-11/12 max-w-sm rounded-3xl p-6 relative z-10 transform scale-95 transition-transform shadow-2xl text-center">
-                <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="alert-triangle" class="w-8 h-8"></i>
+        <div id="confirm-dialog" class="fixed inset-0 z-[60] flex items-center justify-center hidden opacity-0 transition-all duration-300">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm confirm-overlay"></div>
+            <div class="bg-white dark:bg-darkCard w-11/12 max-w-[320px] rounded-[2rem] p-6 relative z-10 transform scale-95 transition-transform shadow-2xl text-center border border-zinc-100 dark:border-zinc-800">
+                <div class="w-16 h-16 bg-red-50 dark:bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="trash-2" class="w-8 h-8"></i>
                 </div>
-                <h3 id="confirm-title" class="text-xl font-bold mb-2">Hapus Item?</h3>
-                <p id="confirm-message" class="text-gray-500 dark:text-gray-400 text-sm mb-6">Tindakan ini tidak dapat dibatalkan.</p>
+                <h3 id="confirm-title" class="text-xl font-bold mb-2">Hapus?</h3>
+                <p id="confirm-message" class="text-zinc-500 dark:text-zinc-400 text-sm mb-8 font-medium">Tindakan ini tidak dapat dibatalkan.</p>
                 <div class="flex gap-3">
-                    <button id="confirm-cancel" class="flex-1 py-3 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">Batal</button>
-                    <button id="confirm-ok" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors shadow-lg shadow-red-200 dark:shadow-none">Hapus</button>
+                    <button id="confirm-cancel" class="flex-1 py-3.5 bg-zinc-100 dark:bg-zinc-800/50 text-zinc-700 dark:text-zinc-300 rounded-2xl font-semibold hover:bg-zinc-200 transition-colors">Batal</button>
+                    <button id="confirm-ok" class="flex-1 py-3.5 bg-red-500 text-white rounded-2xl font-semibold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/30">Hapus</button>
                 </div>
             </div>
         </div>
 
         <!-- Toast Notification Container -->
-        <div id="toast-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 w-max max-w-[90%] pointer-events-none"></div>
+        <div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-3 w-max max-w-[90%] pointer-events-none"></div>
 
     </div>
 
     <script>
-        // --- KONFIGURASI DATABASE ONLINE ---
         const CONFIG = {
-            // Wajib: Paste URL Web App Google Apps Script Anda di dalam tanda kutip di bawah ini!
             GAS_URL: 'https://script.google.com/macros/s/AKfycbzrC0YAoecga039FYAZ9Dkn6zE68tlcJL5JTCX_ZnUfrwJfvXSBc0kNgAkrvFLptbq7Tg/exec'
         };
 
-        // --- DATA & STATE MANAGEMENT ---
         const StorageKey = 'myScheduleApp_data';
-        
         const defaultState = {
-            settings: {
-                theme: 'system', // 'light', 'dark', 'system'
-                userName: 'Pengguna'
-            },
-            tasks: [], // { id, title, date (YYYY-MM-DD), startTime, endTime, category, desc, completed }
-            habits: [], // { id, title, target, unit, icon, color, history: { 'YYYY-MM-DD': count } }
-            lastUpdated: 0 // Menambahkan timestamp untuk mencegah data tertimpa
+            settings: { theme: 'system', userName: 'Pengguna' },
+            tasks: [], // { id, title, date, repeat, startTime, category, desc, completedDates: [] }
+            habits: [], 
+            lastUpdated: 0 
         };
 
         class Store {
@@ -390,44 +354,48 @@
 
             load() {
                 const stored = localStorage.getItem(StorageKey);
-                return stored ? { ...defaultState, ...JSON.parse(stored) } : JSON.parse(JSON.stringify(defaultState));
+                let data = stored ? { ...defaultState, ...JSON.parse(stored) } : JSON.parse(JSON.stringify(defaultState));
+                
+                // MIGRASI OTOMATIS: Tambahkan properti repeat & completedDates ke data lama
+                data.tasks.forEach(t => {
+                    if(!t.repeat) t.repeat = 'none';
+                    if(!t.completedDates) {
+                        t.completedDates = [];
+                        if(t.completed) t.completedDates.push(t.date); // pindahkan status selesai lama
+                    }
+                });
+                return data;
             }
 
             save() {
-                // Catat waktu update terakhir sebelum menyimpan
                 this.data.lastUpdated = Date.now();
-                
-                // Simpan lokal agar UI langsung merespons dengan cepat (tanpa loading)
                 localStorage.setItem(StorageKey, JSON.stringify(this.data));
                 
-                // Auto-sync ke Google Sheets di background (Database Online Otomatis)
                 if (CONFIG.GAS_URL && CONFIG.GAS_URL !== 'MASUKKAN_URL_GAS_ANDA_DISINI') {
                     clearTimeout(this.syncTimer);
-                    // Tunggu 1.5 detik setelah user selesai klik
                     this.syncTimer = setTimeout(() => {
                         fetch(CONFIG.GAS_URL, {
-                            method: 'POST',
-                            mode: 'no-cors', // Mencegah blokir koneksi (CORS) dari browser
+                            method: 'POST', mode: 'no-cors',
                             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                             body: JSON.stringify(this.data)
-                        }).catch(e => console.error('Gagal auto-sync ke database', e));
+                        }).catch(e => console.log('Sync background error', e));
                     }, 1500); 
                 }
             }
 
             // Tasks
             addTask(task) {
-                task.id = 't_' + Date.now().toString(36) + Math.random().toString(36).substr(2);
-                task.completed = false;
+                task.id = 't_' + Date.now().toString(36);
+                task.completedDates = [];
                 this.data.tasks.push(task);
                 this.save();
-                return task;
             }
 
             updateTask(updatedTask) {
                 const index = this.data.tasks.findIndex(t => t.id === updatedTask.id);
                 if (index !== -1) {
-                    this.data.tasks[index] = { ...this.data.tasks[index], ...updatedTask };
+                    updatedTask.completedDates = this.data.tasks[index].completedDates; // Pertahankan history ceklis
+                    this.data.tasks[index] = updatedTask;
                     this.save();
                 }
             }
@@ -437,31 +405,37 @@
                 this.save();
             }
 
-            toggleTask(id) {
+            toggleTask(id, dateStr) {
                 const task = this.data.tasks.find(t => t.id === id);
                 if (task) {
-                    task.completed = !task.completed;
+                    const idx = task.completedDates.indexOf(dateStr);
+                    let isCompleted = false;
+                    
+                    if (idx === -1) {
+                        task.completedDates.push(dateStr);
+                        isCompleted = true;
+                    } else {
+                        task.completedDates.splice(idx, 1);
+                    }
                     this.save();
-                    return task.completed;
+                    return isCompleted;
                 }
                 return false;
             }
 
             getTasksByDate(dateStr) {
                 return this.data.tasks
-                    .filter(t => t.date === dateStr)
-                    .sort((a, b) => (a.startTime || '00:00').localeCompare(b.startTime || '00:00')); // Mencegah error jika jam kosong
+                    .filter(t => utils.isTaskOnDate(t, dateStr))
+                    .sort((a, b) => (a.startTime || '00:00').localeCompare(b.startTime || '00:00'));
             }
 
-            // Habits
+            // Habits (Same logic as before)
             addHabit(habit) {
                 habit.id = 'h_' + Date.now().toString(36);
                 habit.history = {}; 
-                habit.createdAt = utils.getTodayStr();
                 this.data.habits.push(habit);
                 this.save();
             }
-
             updateHabit(updatedHabit) {
                 const index = this.data.habits.findIndex(h => h.id === updatedHabit.id);
                 if (index !== -1) {
@@ -470,22 +444,16 @@
                     this.save();
                 }
             }
-
             deleteHabit(id) {
                 this.data.habits = this.data.habits.filter(h => h.id !== id);
                 this.save();
             }
-
             updateHabitProgress(id, dateStr, increment = 1) {
                 const habit = this.data.habits.find(h => h.id === id);
                 if (habit) {
                     const current = habit.history[dateStr] || 0;
                     let next = current + increment;
-                    
-                    if (increment === 1 && current >= habit.target) {
-                        next = 0; // Reset
-                    }
-                    
+                    if (increment === 1 && current >= habit.target) next = 0;
                     habit.history[dateStr] = Math.max(0, next);
                     this.save();
                     return { progress: habit.history[dateStr], completed: habit.history[dateStr] >= habit.target };
@@ -494,11 +462,8 @@
         }
 
         const store = new Store();
-
-        // Mencegah error "not defined" pada HTML inline onclick dengan mengekspos ke global window
         window.store = store;
 
-        // --- STREAMING_CHUNK:Defining utility functions... ---
         const utils = {
             getTodayStr: () => {
                 const d = new Date();
@@ -509,106 +474,104 @@
                  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
             },
             formatDateDisplay: (dateStr) => {
-                const options = { weekday: 'long', day: 'numeric', month: 'long' };
-                const d = new Date(dateStr);
-                return d.toLocaleDateString('id-ID', options);
+                return new Date(dateStr).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
             },
             getGreeting: () => {
                 const hour = new Date().getHours();
-                if (hour < 11) return 'Selamat pagi 🌅';
-                if (hour < 15) return 'Selamat siang ☀️';
-                if (hour < 19) return 'Selamat sore 🌇';
-                return 'Selamat malam 🌙';
+                if (hour < 11) return 'Selamat Pagi 🌅';
+                if (hour < 15) return 'Selamat Siang ☀️';
+                if (hour < 19) return 'Selamat Sore 🌇';
+                return 'Selamat Malam 🌙';
             },
             getCategoryColor: (cat) => {
                 const colors = {
-                    'personal': 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-400',
-                    'work': 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
-                    'health': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
-                    'learning': 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                    'personal': 'bg-pink-100 text-pink-700 dark:bg-pink-500/20 dark:text-pink-300',
+                    'work': 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300',
+                    'health': 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300',
+                    'learning': 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'
                 };
                 return colors[cat] || colors['personal'];
             },
             getHabitColorHex: (colorName) => {
-                const colors = {
-                    'blue': '#3b82f6', 'emerald': '#10b981', 'pink': '#ec4899',
-                    'amber': '#f59e0b', 'purple': '#8b5cf6', 'red': '#ef4444'
-                };
+                const colors = { 'blue': '#3b82f6', 'emerald': '#10b981', 'pink': '#ec4899', 'amber': '#f59e0b', 'purple': '#8b5cf6', 'red': '#ef4444' };
                 return colors[colorName] || colors['blue'];
             },
-            calculateStreak: (habit) => {
-                let streak = 0;
-                let dates = Object.keys(habit.history)
-                                .filter(d => habit.history[d] >= habit.target)
-                                .sort((a,b) => new Date(b) - new Date(a));
+            getRepeatLabel: (repeat) => {
+                const lbl = { 'daily': 'Harian', 'weekly': 'Mingguan', 'monthly': 'Bulanan' };
+                return lbl[repeat] || '';
+            },
+            isTaskOnDate: (task, checkDateStr) => {
+                if (task.date === checkDateStr) return true; 
+                if (task.date > checkDateStr) return false; // belum mulai
                 
-                if (dates.length === 0) return { current: 0, best: 0 };
-
+                const tDate = new Date(task.date);
+                const cDate = new Date(checkDateStr);
+                
+                if (task.repeat === 'daily') return true;
+                if (task.repeat === 'weekly') return tDate.getDay() === cDate.getDay();
+                if (task.repeat === 'monthly') return tDate.getDate() === cDate.getDate();
+                return false;
+            },
+            calculateStreak: (habit) => {
+                let streak = 0, tempBest = 0, currentRun = 0, prevDate = null;
+                
+                // Curr streak
                 let checkDate = new Date();
                 let dateStr = utils.formatDateId(checkDate);
-                
                 if (!habit.history[dateStr] || habit.history[dateStr] < habit.target) {
                     checkDate.setDate(checkDate.getDate() - 1);
                     dateStr = utils.formatDateId(checkDate);
                 }
-
                 while(habit.history[dateStr] >= habit.target) {
                     streak++;
                     checkDate.setDate(checkDate.getDate() - 1);
                     dateStr = utils.formatDateId(checkDate);
                 }
 
+                // Best Streak
                 let sortedAllDates = Object.keys(habit.history).sort((a,b) => new Date(a) - new Date(b));
-                let tempBest = 0;
-                let currentRun = 0;
-                let prevDate = null;
-
                 sortedAllDates.forEach(d => {
                     if (habit.history[d] >= habit.target) {
                         const currD = new Date(d);
-                        if (!prevDate) {
-                            currentRun = 1;
-                        } else {
+                        if (!prevDate) currentRun = 1;
+                        else {
                             const diff = Math.round((currD - prevDate) / (1000 * 60 * 60 * 24));
-                            if (diff === 1) currentRun++;
-                            else currentRun = 1;
+                            if (diff === 1) currentRun++; else currentRun = 1;
                         }
                         tempBest = Math.max(tempBest, currentRun);
                         prevDate = currD;
                     }
                 });
-
                 return { current: streak, best: tempBest };
             }
         };
-
         window.utils = utils;
 
-        // --- STREAMING_CHUNK:Setting up UI helper objects... ---
+        // --- STREAMING_CHUNK:UI Helpers (Toast, Confirm, Theme)... ---
         const ui = {
             toast: (message, type = 'success') => {
                 const container = document.getElementById('toast-container');
                 const toast = document.createElement('div');
-                const bg = type === 'success' ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900' : 'bg-red-500 text-white';
+                const bg = type === 'success' ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' : 'bg-red-500 text-white';
                 const icon = type === 'success' ? 'check-circle' : 'alert-circle';
                 
-                toast.className = `${bg} px-4 py-3 rounded-2xl shadow-lg flex items-center gap-3 animate-slide-up transform pointer-events-auto`;
-                toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span class="text-sm font-medium">${message}</span>`;
+                toast.className = `${bg} px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 animate-slide-up transform pointer-events-auto font-medium`;
+                toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> <span class="text-sm">${message}</span>`;
                 
                 container.appendChild(toast);
-                if(typeof lucide !== 'undefined') lucide.createIcons();
+                if(window.lucide) lucide.createIcons();
 
                 setTimeout(() => {
                     toast.classList.replace('animate-slide-up', 'opacity-0');
-                    toast.style.transition = 'opacity 0.3s ease';
-                    setTimeout(() => toast.remove(), 300);
+                    toast.style.transition = 'opacity 0.4s ease';
+                    setTimeout(() => toast.remove(), 400);
                 }, 3000);
             },
             
             confirm: (title, message, onConfirm) => {
                 const dialog = document.getElementById('confirm-dialog');
                 const overlay = dialog.querySelector('.confirm-overlay');
-                const dialogBox = dialog.querySelector('.bg-white');
+                const dialogBox = dialog.querySelector('.bg-white, .dark\\:bg-darkCard');
                 
                 document.getElementById('confirm-title').textContent = title;
                 document.getElementById('confirm-message').textContent = message;
@@ -653,105 +616,105 @@
                 }
             }
         };
-
         window.ui = ui;
 
-        // --- STREAMING_CHUNK:Building view templates (Home, Schedule, Habits, Stats, Settings)... ---
+        // --- STREAMING_CHUNK:Building the Premium Views... ---
         const views = {
             home: () => {
                 const today = utils.getTodayStr();
                 const tasks = store.getTasksByDate(today);
-                const completed = tasks.filter(t => t.completed).length;
+                const completed = tasks.filter(t => t.completedDates.includes(today)).length;
                 const total = tasks.length;
                 const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
 
                 let html = `
-                    <div class="px-6 pt-12 pb-6 bg-white dark:bg-darkBg transition-colors z-10 sticky top-0">
+                    <div class="px-6 pt-12 pb-6 sticky top-0 z-10 glass-nav border-b border-zinc-200/50 dark:border-zinc-800/50">
                         <div class="flex justify-between items-center mb-6">
                             <div>
-                                <h1 class="text-2xl font-bold tracking-tight">${utils.getGreeting()}</h1>
-                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">${utils.formatDateDisplay(today)}</p>
+                                <h1 class="text-2xl font-extrabold tracking-tight">${utils.getGreeting()}</h1>
+                                <p class="text-zinc-500 text-sm mt-1 font-medium">${utils.formatDateDisplay(today)}</p>
                             </div>
-                            <button onclick="app.navigate('settings')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors">
+                            <button onclick="app.navigate('settings')" class="w-10 h-10 rounded-2xl bg-zinc-200/50 dark:bg-zinc-800/50 flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 transition-colors">
                                 <i data-lucide="settings" class="w-5 h-5"></i>
                             </button>
                         </div>
 
-                        <!-- Progress Card -->
-                        <div class="bg-gradient-to-br from-primary to-primaryLight p-6 rounded-3xl text-white shadow-lg shadow-indigo-200 dark:shadow-none relative overflow-hidden">
-                            <div class="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -translate-y-10 translate-x-10"></div>
-                            <h2 class="text-sm font-medium opacity-90 mb-1">Aktivitas Hari Ini</h2>
-                            <div class="flex items-end gap-2 mb-4">
-                                <span class="text-3xl font-bold">${completed}</span>
-                                <span class="text-sm opacity-80 mb-1">/ ${total} selesai</span>
+                        <!-- Premium Progress Card -->
+                        <div class="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-3xl text-white shadow-glow shadow-indigo-500/30 relative overflow-hidden">
+                            <div class="absolute -top-12 -right-12 w-40 h-40 bg-white opacity-10 rounded-full blur-2xl"></div>
+                            <h2 class="text-sm font-semibold opacity-90 mb-1">Aktivitas Hari Ini</h2>
+                            <div class="flex items-end gap-2 mb-5">
+                                <span class="text-4xl font-black">${completed}</span>
+                                <span class="text-sm font-medium opacity-80 mb-1.5">/ ${total} selesai</span>
                             </div>
-                            <div class="w-full bg-white/30 rounded-full h-2 mb-2">
+                            <div class="w-full bg-indigo-900/30 rounded-full h-2 mb-2 overflow-hidden">
                                 <div class="bg-white h-2 rounded-full transition-all duration-1000 ease-out" style="width: ${progress}%"></div>
                             </div>
-                            <div class="flex justify-between text-xs opacity-90 font-medium">
+                            <div class="flex justify-between text-xs opacity-90 font-semibold tracking-wide uppercase">
                                 <span>Progress</span>
                                 <span>${progress}%</span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="px-6 mt-2">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-bold">Jadwal</h3>
-                            <button onclick="app.navigate('schedule')" class="text-sm text-primary font-medium">Lihat Semua</button>
+                    <div class="px-6 mt-6">
+                        <div class="flex justify-between items-end mb-4">
+                            <h3 class="text-lg font-bold">Jadwal Hari Ini</h3>
+                            <button onclick="app.navigate('schedule')" class="text-sm text-primary font-semibold hover:text-indigo-600">Lihat Semua</button>
                         </div>
                 `;
 
                 if (tasks.length === 0) {
                     html += `
-                        <div class="flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-darkCard rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
-                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                                <i data-lucide="coffee" class="text-gray-400 w-8 h-8"></i>
+                        <div class="flex flex-col items-center justify-center py-16 px-4 text-center glass-card rounded-3xl">
+                            <div class="w-16 h-16 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl flex items-center justify-center mb-4">
+                                <i data-lucide="coffee" class="text-zinc-400 w-8 h-8"></i>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-300 font-medium mb-1">Belum ada aktivitas hari ini</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Mulai rencanakan harimu.</p>
-                            <button onclick="app.openModal('task-modal', null, '${today}')" class="px-5 py-2.5 bg-primary/10 text-primary font-medium rounded-xl hover:bg-primary/20 transition-colors text-sm">
+                            <p class="text-zinc-800 dark:text-zinc-200 font-bold mb-1">Belum ada aktivitas</p>
+                            <p class="text-sm text-zinc-500 font-medium mb-5">Mulai rencanakan harimu.</p>
+                            <button onclick="app.openModal('task-modal', null, '${today}')" class="px-5 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-indigo-600 transition-colors shadow-lg shadow-indigo-500/20 text-sm">
                                 + Tambah Jadwal
                             </button>
                         </div>
                     `;
                 } else {
-                    html += `<div class="space-y-4 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 dark:before:via-gray-700 before:to-transparent">`;
-                    
+                    html += `<div class="space-y-4">`;
                     tasks.forEach((task, index) => {
+                        const isDone = task.completedDates.includes(today);
                         const catStyle = utils.getCategoryColor(task.category);
+                        const repeatLbl = utils.getRepeatLabel(task.repeat);
+                        
                         html += `
-                            <div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group animate-fade-in" style="animation-delay: ${index * 50}ms">
+                            <div class="glass-card p-4 rounded-3xl flex gap-4 items-center transition-all hover:shadow-md animate-fade-in group" style="animation-delay: ${index * 50}ms">
                                 
-                                <div class="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white dark:border-darkBg bg-gray-200 dark:bg-gray-700 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10 transition-colors ${task.completed ? '!bg-primary' : ''}">
-                                    ${task.completed ? '<i data-lucide="check" class="w-4 h-4 text-white"></i>' : '<div class="w-2.5 h-2.5 rounded-full bg-white dark:bg-gray-400"></div>'}
+                                <div class="flex flex-col items-center justify-center w-12 shrink-0 border-r border-zinc-100 dark:border-zinc-800 pr-4">
+                                    <span class="text-sm font-bold text-zinc-800 dark:text-zinc-200">${(task.startTime||'00:00').split(':')[0]}</span>
+                                    <span class="text-[10px] font-semibold text-zinc-400">${(task.startTime||'00:00').split(':')[1]}</span>
                                 </div>
                                 
-                                <div class="w-[calc(100%-3rem)] md:w-[calc(50%-2.5rem)] bg-white dark:bg-darkCard p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 ml-4 md:ml-0 transition-all hover:shadow-md ${task.completed ? 'opacity-70' : ''}">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <div class="flex flex-col">
-                                            <span class="text-xs font-bold text-gray-400 dark:text-gray-500 mb-1">${task.startTime} ${task.endTime ? '- ' + task.endTime : ''}</span>
-                                            <h4 class="font-bold text-gray-800 dark:text-white text-base ${task.completed ? 'line-through decoration-2 decoration-gray-300' : ''}">${task.title}</h4>
-                                        </div>
-                                        <div class="flex items-center gap-2">
-                                            <button onclick="app.editTask('${task.id}')" class="p-1.5 text-gray-400 hover:text-primary transition-colors">
-                                                <i data-lucide="edit-2" class="w-4 h-4"></i>
-                                            </button>
-                                            <button onclick="app.deleteTaskDirect('${task.id}')" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
-                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                            </button>
-                                            <input type="checkbox" class="custom-checkbox" ${task.completed ? 'checked' : ''} onchange="app.toggleTask('${task.id}', event)">
-                                        </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-bold text-zinc-800 dark:text-zinc-100 text-sm truncate ${isDone ? 'line-through text-zinc-400 dark:text-zinc-500' : ''}">${task.title}</h4>
+                                        ${repeatLbl ? `<i data-lucide="repeat" class="w-3 h-3 text-zinc-400" title="Berulang ${repeatLbl}"></i>` : ''}
                                     </div>
-                                    ${task.desc ? `<p class="text-sm text-gray-500 line-clamp-2 mt-1 mb-3">${task.desc}</p>` : '<div class="h-2"></div>'}
-                                    <span class="inline-block px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-lg ${catStyle}">${task.category}</span>
+                                    <div class="flex gap-2 items-center">
+                                        <span class="inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded-md ${catStyle}">${task.category}</span>
+                                        ${task.desc ? `<span class="text-[10px] text-zinc-400 truncate max-w-[100px]">${task.desc}</span>` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-2 shrink-0 items-center">
+                                    <div class="hidden group-hover:flex gap-1 animate-fade-in">
+                                        <button onclick="app.editTask('${task.id}')" class="p-1.5 text-zinc-400 hover:text-primary transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button onclick="app.deleteTaskDirect('${task.id}')" class="p-1.5 text-zinc-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                    <input type="checkbox" class="custom-checkbox ml-1" ${isDone ? 'checked' : ''} onchange="app.toggleTaskUI('${task.id}', '${today}', event)">
                                 </div>
                             </div>
                         `;
                     });
                     html += `</div>`;
                 }
-
                 html += `</div>`;
                 return html;
             },
@@ -763,22 +726,20 @@
                 const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
                 
                 let calendarHtml = `<div class="grid grid-cols-7 gap-1 text-center mb-6">
-                    ${['M','S','S','R','K','J','S'].map(d => `<div class="text-xs font-medium text-gray-400 py-2">${d}</div>`).join('')}`;
+                    ${['M','S','S','R','K','J','S'].map(d => `<div class="text-[10px] font-bold text-zinc-400 py-2">${d}</div>`).join('')}`;
                 
-                for (let i = 0; i < firstDay; i++) {
-                    calendarHtml += `<div></div>`;
-                }
+                for (let i = 0; i < firstDay; i++) calendarHtml += `<div></div>`;
                 
                 for (let i = 1; i <= daysInMonth; i++) {
                     const dateStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`;
                     const hasTasks = store.getTasksByDate(dateStr).length > 0;
                     const isToday = i === today.getDate();
                     
-                    let bg = isToday ? 'bg-primary text-white font-bold' : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300';
-                    let indicator = hasTasks && !isToday ? '<div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-primary rounded-full"></div>' : '';
+                    let bg = isToday ? 'bg-primary text-white font-bold shadow-md shadow-indigo-500/30' : 'hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium';
+                    let indicator = hasTasks && !isToday ? '<div class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 bg-indigo-400 rounded-full"></div>' : '';
                     
                     calendarHtml += `
-                        <button onclick="views.renderDayTasks('${dateStr}')" class="relative w-full aspect-square rounded-full flex items-center justify-center text-sm ${bg} transition-colors">
+                        <button onclick="views.renderDayTasks('${dateStr}')" class="relative w-full aspect-square rounded-2xl flex items-center justify-center text-sm ${bg} transition-all active:scale-95">
                             ${i}
                             ${indicator}
                         </button>
@@ -789,24 +750,25 @@
                 let html = `
                     <div class="px-6 pt-12 pb-6">
                         <div class="flex justify-between items-center mb-6">
-                            <h1 class="text-2xl font-bold tracking-tight">Jadwal</h1>
-                            <button onclick="app.openModal('task-modal')" class="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-lg">+ Tambah</button>
+                            <h1 class="text-2xl font-extrabold tracking-tight">Kalender</h1>
+                            <button onclick="app.openModal('task-modal')" class="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/10 text-primary rounded-2xl flex items-center justify-center font-bold hover:bg-indigo-100 transition-colors">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                            </button>
                         </div>
                         
-                        <div class="bg-white dark:bg-darkCard p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 mb-8">
-                            <div class="flex justify-between items-center mb-4">
-                                <h2 class="font-bold">${monthName}</h2>
+                        <div class="glass-card p-5 rounded-[2rem] shadow-sm mb-8">
+                            <div class="flex justify-between items-center mb-4 px-2">
+                                <h2 class="font-bold text-lg">${monthName}</h2>
+                                <!-- Placeholder arrow untuk styling -->
                                 <div class="flex gap-2">
-                                    <button class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><i data-lucide="chevron-left" class="w-4 h-4"></i></button>
-                                    <button class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"><i data-lucide="chevron-right" class="w-4 h-4"></i></button>
+                                    <div class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center text-zinc-400"><i data-lucide="chevron-left" class="w-4 h-4"></i></div>
+                                    <div class="w-8 h-8 rounded-full bg-zinc-100 dark:bg-zinc-800/50 flex items-center justify-center text-zinc-400"><i data-lucide="chevron-right" class="w-4 h-4"></i></div>
                                 </div>
                             </div>
                             ${calendarHtml}
                         </div>
 
-                        <div id="day-tasks-container">
-                            <!-- Tasks injected here -->
-                        </div>
+                        <div id="day-tasks-container"></div>
                     </div>
                 `;
                 
@@ -824,31 +786,31 @@
                 let html = `<h3 class="text-lg font-bold mb-4">${displayDate}</h3>`;
                 
                 if (tasks.length === 0) {
-                    html += `<p class="text-gray-500 text-sm italic text-center py-8">Tidak ada jadwal pada tanggal ini.</p>`;
+                    html += `<div class="glass-card p-6 rounded-3xl text-center"><p class="text-zinc-500 text-sm font-medium">Tidak ada jadwal pada tanggal ini.</p></div>`;
                 } else {
                     html += `<div class="space-y-3">`;
                     tasks.forEach(task => {
+                        const isDone = task.completedDates.includes(dateStr);
                         const catStyle = utils.getCategoryColor(task.category);
-                        const startH = (task.startTime || '00:00').split(':')[0];
-                        const startM = (task.startTime || '00:00').split(':')[1];
+                        const repeatLbl = utils.getRepeatLabel(task.repeat);
                         
                         html += `
-                            <div class="bg-white dark:bg-darkCard p-4 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 flex gap-4 items-center">
-                                <div class="flex flex-col items-center justify-center w-12 shrink-0 border-r border-gray-100 dark:border-gray-700 pr-4">
-                                    <span class="text-xs font-bold text-gray-800 dark:text-gray-200">${startH}</span>
-                                    <span class="text-[10px] text-gray-400">${startM}</span>
+                            <div class="glass-card p-4 rounded-3xl flex gap-4 items-center group">
+                                <div class="flex flex-col items-center justify-center w-12 shrink-0 border-r border-zinc-100 dark:border-zinc-800 pr-4">
+                                    <span class="text-sm font-bold text-zinc-800 dark:text-zinc-200">${(task.startTime||'00:00').split(':')[0]}</span>
+                                    <span class="text-[10px] font-semibold text-zinc-400">${(task.startTime||'00:00').split(':')[1]}</span>
                                 </div>
-                                <div class="flex-1">
-                                    <h4 class="font-bold text-gray-800 dark:text-white text-sm ${task.completed ? 'line-through text-gray-400' : ''}">${task.title}</h4>
-                                    <span class="inline-block px-2 py-0.5 mt-1 text-[9px] font-bold uppercase rounded-md ${catStyle}">${task.category}</span>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-bold text-zinc-800 dark:text-zinc-100 text-sm truncate ${isDone ? 'line-through text-zinc-400' : ''}">${task.title}</h4>
+                                        ${repeatLbl ? `<i data-lucide="repeat" class="w-3 h-3 text-zinc-400"></i>` : ''}
+                                    </div>
+                                    <span class="inline-block px-2 py-0.5 text-[9px] font-bold uppercase rounded-md ${catStyle}">${task.category}</span>
                                 </div>
-                                <div class="flex gap-2 shrink-0">
-                                     <button onclick="app.editTask('${task.id}')" class="p-2 text-gray-400 hover:text-primary bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors">
-                                        <i data-lucide="edit-2" class="w-4 h-4"></i>
-                                    </button>
-                                     <button onclick="app.deleteTaskDirect('${task.id}')" class="p-2 text-gray-400 hover:text-red-500 bg-gray-50 dark:bg-gray-800 rounded-xl transition-colors">
-                                        <i data-lucide="trash-2" class="w-4 h-4"></i>
-                                    </button>
+                                <div class="flex gap-2 shrink-0 items-center">
+                                     <button onclick="app.editTask('${task.id}')" class="p-2 text-zinc-400 hover:text-primary transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                     <button onclick="app.deleteTaskDirect('${task.id}')" class="p-2 text-zinc-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                     <input type="checkbox" class="custom-checkbox ml-1" ${isDone ? 'checked' : ''} onchange="app.toggleTaskUI('${task.id}', '${dateStr}', event)">
                                 </div>
                             </div>
                         `;
@@ -857,16 +819,18 @@
                 }
 
                 container.innerHTML = html;
-                if(typeof lucide !== 'undefined') lucide.createIcons();
+                if(window.lucide) lucide.createIcons();
             },
 
+            // (Stats, Habits, and Settings views remain similarly structured but updated with glass-card classes for consistency)
             stats: () => {
                 const tasks = store.data.tasks;
                 const habits = store.data.habits;
                 
-                const totalTasks = tasks.length;
-                const completedTasks = tasks.filter(t => t.completed).length;
-                const completionRate = totalTasks ? Math.round((completedTasks/totalTasks)*100) : 0;
+                const today = utils.getTodayStr();
+                const totalTasksToday = store.getTasksByDate(today).length;
+                const doneTasksToday = store.getTasksByDate(today).filter(t => t.completedDates.includes(today)).length;
+                const rate = totalTasksToday ? Math.round((doneTasksToday/totalTasksToday)*100) : 0;
 
                 let bestOverallStreak = 0;
                 habits.forEach(h => {
@@ -876,34 +840,35 @@
 
                 let html = `
                     <div class="px-6 pt-12 pb-6">
-                        <h1 class="text-2xl font-bold tracking-tight mb-6">Statistik</h1>
+                        <h1 class="text-2xl font-extrabold tracking-tight mb-6">Statistik Harian</h1>
                         
                         <div class="grid grid-cols-2 gap-4 mb-6">
-                            <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center justify-center">
-                                <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 text-primary rounded-full flex items-center justify-center mb-2">
-                                    <i data-lucide="check-square" class="w-5 h-5"></i>
+                            <div class="glass-card p-5 rounded-[2rem] flex flex-col items-center text-center justify-center">
+                                <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-500/10 text-primary rounded-2xl flex items-center justify-center mb-3">
+                                    <i data-lucide="check-square" class="w-6 h-6"></i>
                                 </div>
-                                <span class="text-3xl font-bold mb-1">${completedTasks}</span>
-                                <span class="text-xs font-medium text-gray-500">Tugas Selesai</span>
+                                <span class="text-3xl font-black mb-1">${doneTasksToday}</span>
+                                <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Selesai Hari Ini</span>
                             </div>
-                            <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center justify-center">
-                                <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center mb-2">
-                                    <i data-lucide="trending-up" class="w-5 h-5"></i>
+                            <div class="glass-card p-5 rounded-[2rem] flex flex-col items-center text-center justify-center">
+                                <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-500 rounded-2xl flex items-center justify-center mb-3">
+                                    <i data-lucide="trending-up" class="w-6 h-6"></i>
                                 </div>
-                                <span class="text-3xl font-bold mb-1">${completionRate}%</span>
-                                <span class="text-xs font-medium text-gray-500">Completion Rate</span>
+                                <span class="text-3xl font-black mb-1">${rate}%</span>
+                                <span class="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Completion</span>
                             </div>
-                            <div class="bg-white dark:bg-darkCard p-4 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm flex flex-col items-center text-center justify-center col-span-2">
+                            <div class="glass-card p-5 rounded-[2rem] flex flex-col items-center text-center justify-center col-span-2 relative overflow-hidden">
+                                <div class="absolute -right-4 -top-4 w-20 h-20 bg-orange-400 opacity-20 rounded-full blur-2xl"></div>
                                 <div class="flex items-center gap-3 mb-2">
-                                     <i data-lucide="award" class="w-6 h-6 text-orange-500"></i>
-                                     <span class="text-lg font-bold">Best Habit Streak</span>
+                                     <i data-lucide="flame" class="w-6 h-6 text-orange-500"></i>
+                                     <span class="text-sm font-bold uppercase tracking-wide">Best Habit Streak</span>
                                 </div>
-                                <div class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">${bestOverallStreak} <span class="text-sm font-bold text-gray-400">Hari</span></div>
+                                <div class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500 mt-1">${bestOverallStreak} <span class="text-base font-bold text-zinc-400">Hari</span></div>
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-darkCard p-5 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm mb-6">
-                            <h3 class="font-bold mb-4 text-sm">Aktivitas 7 Hari Terakhir</h3>
+                        <div class="glass-card p-6 rounded-[2rem] mb-6">
+                            <h3 class="font-bold mb-4 text-sm uppercase tracking-wide text-zinc-500">Aktivitas 7 Hari Terakhir</h3>
                             <div class="h-40 w-full relative">
                                 <canvas id="weeklyChart"></canvas>
                             </div>
@@ -922,7 +887,7 @@
                             labels.push(d.toLocaleDateString('id-ID', {weekday:'short'}));
                             
                             const dStr = utils.formatDateId(d);
-                            const doneCount = store.getTasksByDate(dStr).filter(t => t.completed).length;
+                            const doneCount = store.getTasksByDate(dStr).filter(t => t.completedDates.includes(dStr)).length;
                             data.push(doneCount);
                         }
 
@@ -931,20 +896,18 @@
                             data: {
                                 labels: labels,
                                 datasets: [{
-                                    label: 'Tugas Selesai',
                                     data: data,
-                                    backgroundColor: '#4F46E5',
+                                    backgroundColor: '#6366f1',
                                     borderRadius: 6,
-                                    barThickness: 12
+                                    barThickness: 16
                                 }]
                             },
                             options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
+                                responsive: true, maintainAspectRatio: false,
                                 plugins: { legend: { display: false } },
                                 scales: {
-                                    y: { beginAtZero: true, ticks: { stepSize: 1, color: '#9ca3af' }, grid: { color: 'rgba(156, 163, 175, 0.1)' } },
-                                    x: { ticks: { color: '#9ca3af' }, grid: { display: false } }
+                                    y: { beginAtZero: true, ticks: { stepSize: 1, color: '#a1a1aa' }, grid: { color: 'rgba(161, 161, 170, 0.1)' } },
+                                    x: { ticks: { color: '#a1a1aa', font: { size: 10 } }, grid: { display: false } }
                                 }
                             }
                         });
@@ -958,20 +921,22 @@
                 let html = `
                     <div class="px-6 pt-12 pb-6">
                         <div class="flex justify-between items-center mb-6">
-                            <h1 class="text-2xl font-bold tracking-tight">Habit Tracker</h1>
-                            <button onclick="app.openModal('habit-modal')" class="text-sm font-medium text-primary bg-primary/10 px-3 py-1.5 rounded-lg">+ Tambah</button>
+                            <h1 class="text-2xl font-extrabold tracking-tight">Habit Tracker</h1>
+                            <button onclick="app.openModal('habit-modal')" class="w-10 h-10 bg-indigo-50 dark:bg-indigo-500/10 text-primary rounded-2xl flex items-center justify-center font-bold hover:bg-indigo-100 transition-colors">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                            </button>
                         </div>
                 `;
 
                 if (habits.length === 0) {
                     html += `
-                        <div class="flex flex-col items-center justify-center py-12 px-4 text-center bg-gray-50 dark:bg-darkCard rounded-3xl border border-dashed border-gray-200 dark:border-gray-700">
-                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                                <i data-lucide="sparkles" class="text-gray-400 w-8 h-8"></i>
+                        <div class="flex flex-col items-center justify-center py-16 px-4 text-center glass-card rounded-3xl">
+                            <div class="w-16 h-16 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl flex items-center justify-center mb-4">
+                                <i data-lucide="sparkles" class="text-zinc-400 w-8 h-8"></i>
                             </div>
-                            <p class="text-gray-600 dark:text-gray-300 font-medium mb-1">Belum ada habit</p>
-                            <p class="text-sm text-gray-500 dark:text-gray-500 mb-4">Mulai bangun kebiasaan baik hari ini.</p>
-                            <button onclick="app.openModal('habit-modal')" class="px-5 py-2.5 bg-primary/10 text-primary font-medium rounded-xl hover:bg-primary/20 transition-colors text-sm">
+                            <p class="text-zinc-800 dark:text-zinc-200 font-bold mb-1">Belum ada habit</p>
+                            <p class="text-sm text-zinc-500 font-medium mb-5">Mulai bangun kebiasaan baik.</p>
+                            <button onclick="app.openModal('habit-modal')" class="px-5 py-2.5 bg-primary text-white font-semibold rounded-xl hover:bg-indigo-600 transition-colors shadow-lg shadow-indigo-500/20 text-sm">
                                 + Tambah Habit
                             </button>
                         </div>
@@ -986,50 +951,46 @@
                         const streak = utils.calculateStreak(habit);
 
                         html += `
-                            <div class="bg-white dark:bg-darkCard p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-800 relative overflow-hidden transition-all hover:shadow-md">
+                            <div class="glass-card p-5 rounded-3xl relative overflow-hidden transition-all hover:shadow-md group">
                                 <div class="absolute top-0 left-0 w-1.5 h-full" style="background-color: ${colorHex}"></div>
                                 
                                 <div class="flex justify-between items-start pl-2">
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-4">
                                         <div class="w-12 h-12 rounded-2xl flex items-center justify-center" style="background-color: ${colorHex}20; color: ${colorHex}">
                                             <i data-lucide="${habit.icon}" class="w-6 h-6"></i>
                                         </div>
                                         <div>
-                                            <h3 class="font-bold text-gray-800 dark:text-white">${habit.title}</h3>
-                                            <div class="flex items-center gap-2 mt-1 text-xs font-medium text-gray-500">
-                                                <span class="flex items-center gap-1 text-orange-500"><i data-lucide="flame" class="w-3.5 h-3.5"></i> ${streak.current} streak</span>
-                                                <span class="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-700"></span>
+                                            <h3 class="font-bold text-zinc-800 dark:text-zinc-100 text-base">${habit.title}</h3>
+                                            <div class="flex items-center gap-2 mt-0.5 text-xs font-semibold text-zinc-500">
+                                                <span class="flex items-center gap-1 text-orange-500"><i data-lucide="flame" class="w-3.5 h-3.5"></i> ${streak.current} hari</span>
+                                                <span class="w-1 h-1 rounded-full bg-zinc-300 dark:bg-zinc-700"></span>
                                                 <span>Best: ${streak.best}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="flex gap-1">
-                                        <button onclick="app.editHabit('${habit.id}')" class="p-2 text-gray-400 hover:text-primary transition-colors">
-                                            <i data-lucide="edit-2" class="w-5 h-5"></i>
-                                        </button>
-                                        <button onclick="app.deleteHabitDirect('${habit.id}')" class="p-2 text-gray-400 hover:text-red-500 transition-colors">
-                                            <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                        </button>
+                                    <div class="hidden group-hover:flex gap-1 animate-fade-in">
+                                        <button onclick="app.editHabit('${habit.id}')" class="p-2 text-zinc-400 hover:text-primary transition-colors"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                        <button onclick="app.deleteHabitDirect('${habit.id}')" class="p-2 text-zinc-400 hover:text-red-500 transition-colors"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                                     </div>
                                 </div>
 
-                                <div class="mt-4 flex items-center justify-between pl-2">
-                                    <div class="flex-1 mr-4">
-                                        <div class="flex justify-between text-xs font-bold text-gray-500 mb-2">
+                                <div class="mt-5 flex items-center justify-between pl-2">
+                                    <div class="flex-1 mr-5">
+                                        <div class="flex justify-between text-xs font-bold text-zinc-500 mb-2 uppercase tracking-wide">
                                             <span>Progress</span>
                                             <span>${currentProgress} / ${habit.target} ${habit.unit}</span>
                                         </div>
-                                        <div class="h-2.5 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                        <div class="h-2.5 w-full bg-zinc-100 dark:bg-zinc-800/80 rounded-full overflow-hidden">
                                             <div class="h-full rounded-full transition-all duration-500" style="width: ${Math.min(100, (currentProgress/habit.target)*100)}%; background-color: ${colorHex}"></div>
                                         </div>
                                     </div>
                                     <div class="flex gap-2">
                                         ${currentProgress > 0 ? `
-                                        <button onclick="app.decrementHabit('${habit.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-sm border-2 border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300">
+                                        <button onclick="app.decrementHabit('${habit.id}')" class="w-10 h-10 rounded-2xl flex items-center justify-center transition-transform active:scale-90 shadow-sm border-2 border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:border-zinc-300">
                                             <i data-lucide="minus" class="w-5 h-5"></i>
                                         </button>
                                         ` : ''}
-                                        <button onclick="app.incrementHabit('${habit.id}')" class="w-10 h-10 rounded-xl flex items-center justify-center transition-all active:scale-90 shadow-sm border-2 ${isDone ? 'border-transparent text-white' : 'border-gray-200 dark:border-gray-700 text-gray-400 hover:border-gray-300'}" style="${isDone ? `background-color: ${colorHex}` : ''}">
+                                        <button onclick="app.incrementHabit('${habit.id}')" class="w-10 h-10 rounded-2xl flex items-center justify-center transition-transform active:scale-90 shadow-sm border-2 ${isDone ? 'border-transparent text-white' : 'border-zinc-200 dark:border-zinc-700 text-zinc-400 hover:border-zinc-300'}" style="${isDone ? `background-color: ${colorHex}` : ''}">
                                             <i data-lucide="${isDone ? 'check' : 'plus'}" class="w-5 h-5"></i>
                                         </button>
                                     </div>
@@ -1039,34 +1000,31 @@
                     });
                     html += `</div>`;
                 }
-
                 html += `</div>`;
                 return html;
             },
 
             settings: () => {
                 const s = store.data.settings;
-                
-                let html = `
+                return `
                     <div class="px-6 pt-12 pb-24">
-                        <div class="flex items-center gap-3 mb-8">
-                            <button onclick="app.navigate('home')" class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:bg-gray-200 transition-colors">
+                        <div class="flex items-center gap-4 mb-8">
+                            <button onclick="app.navigate('home')" class="w-10 h-10 rounded-2xl bg-zinc-200/50 dark:bg-zinc-800/50 flex items-center justify-center text-zinc-600 dark:text-zinc-300 hover:bg-zinc-200 transition-colors">
                                 <i data-lucide="arrow-left" class="w-5 h-5"></i>
                             </button>
-                            <h1 class="text-2xl font-bold tracking-tight">Pengaturan</h1>
+                            <h1 class="text-2xl font-extrabold tracking-tight">Pengaturan</h1>
                         </div>
 
-                        <div class="space-y-6">
-                            
+                        <div class="space-y-8">
                             <div>
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Tampilan</h3>
-                                <div class="bg-white dark:bg-darkCard rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                                    <div class="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800">
+                                <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 px-2">Tampilan</h3>
+                                <div class="glass-card rounded-3xl overflow-hidden shadow-sm">
+                                    <div class="flex items-center justify-between p-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center"><i data-lucide="moon" class="w-4 h-4 text-gray-600 dark:text-gray-300"></i></div>
-                                            <span class="font-medium">Tema Gelap</span>
+                                            <div class="w-10 h-10 rounded-2xl bg-zinc-100 dark:bg-zinc-800/80 flex items-center justify-center"><i data-lucide="moon" class="w-5 h-5 text-zinc-600 dark:text-zinc-300"></i></div>
+                                            <span class="font-bold">Tema Gelap</span>
                                         </div>
-                                        <select onchange="app.changeTheme(this.value)" class="bg-transparent text-sm font-medium text-gray-500 outline-none text-right appearance-none cursor-pointer">
+                                        <select onchange="app.changeTheme(this.value)" class="bg-transparent text-sm font-bold text-zinc-500 outline-none text-right appearance-none cursor-pointer">
                                             <option value="light" ${s.theme==='light'?'selected':''}>Light</option>
                                             <option value="dark" ${s.theme==='dark'?'selected':''}>Dark</option>
                                             <option value="system" ${s.theme==='system'?'selected':''}>System</option>
@@ -1076,31 +1034,30 @@
                             </div>
 
                             <div>
-                                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-2">Data</h3>
-                                <div class="bg-white dark:bg-darkCard rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden">
-                                    <button onclick="app.exportData()" class="w-full flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <div class="flex items-center gap-3 text-gray-700 dark:text-gray-300">
-                                            <div class="w-8 h-8 rounded-full bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-500"><i data-lucide="download" class="w-4 h-4"></i></div>
-                                            <span class="font-medium">Backup Data</span>
+                                <h3 class="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-3 px-2">Data Cloud</h3>
+                                <div class="glass-card rounded-3xl overflow-hidden shadow-sm">
+                                    <button onclick="app.autoLoadFromCloud(true)" class="w-full flex items-center justify-between p-4 border-b border-zinc-100 dark:border-zinc-800/50 hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors">
+                                        <div class="flex items-center gap-3 text-zinc-700 dark:text-zinc-300">
+                                            <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-500"><i data-lucide="download-cloud" class="w-5 h-5"></i></div>
+                                            <span class="font-bold">Download Data Cloud</span>
                                         </div>
                                     </button>
-                                    <button onclick="app.clearData()" class="w-full flex items-center justify-between p-4 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors group">
+                                    <button onclick="app.clearData()" class="w-full flex items-center justify-between p-4 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors group">
                                         <div class="flex items-center gap-3 text-red-500">
-                                            <div class="w-8 h-8 rounded-full bg-red-50 dark:bg-red-900/30 flex items-center justify-center"><i data-lucide="trash-2" class="w-4 h-4"></i></div>
-                                            <span class="font-medium">Hapus Semua Data</span>
+                                            <div class="w-10 h-10 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center"><i data-lucide="trash-2" class="w-5 h-5"></i></div>
+                                            <span class="font-bold">Hapus Semua Data</span>
                                         </div>
                                     </button>
                                 </div>
-                                <p class="text-[10px] text-gray-400 text-center mt-4">Data disimpan secara lokal di perangkat ini.</p>
+                                <p class="text-[10px] text-zinc-400 text-center mt-4 font-medium">Auto-sync di background selalu aktif setiap kali ada perubahan.</p>
                             </div>
                         </div>
                     </div>
                 `;
-                return html;
             }
         };
 
-        // --- STREAMING_CHUNK:App Core controller, logic, and Cloud Sync implementation... ---
+        // --- STREAMING_CHUNK:App Core controller... ---
         const app = {
             currentView: 'home',
             
@@ -1111,21 +1068,11 @@
                 app.setupForms();
                 app.setupIconSelectors();
                 
-                // Loading screen untuk menarik data dari database saat aplikasi baru dibuka
                 if (CONFIG.GAS_URL && CONFIG.GAS_URL !== 'MASUKKAN_URL_GAS_ANDA_DISINI') {
-                    document.getElementById('main-content').innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full mt-20">
-                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-4"></div>
-                            <p class="text-sm text-gray-500 font-medium">Sinkronisasi Database...</p>
-                        </div>`;
-                    await app.autoLoadFromCloud();
+                    app.autoLoadFromCloud();
                 }
 
                 app.navigate('home');
-
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                    if (store.data.settings.theme === 'system') ui.applyTheme();
-                });
             },
 
             navigate: (viewName) => {
@@ -1133,47 +1080,33 @@
                 content.style.opacity = '0';
                 
                 setTimeout(() => {
-                    // Try-Catch untuk mencegah Layar Blank jika ada error render
-                    try {
-                        content.innerHTML = views[viewName]();
-                    } catch (err) {
-                        console.error("Gagal memuat tampilan:", err);
-                        content.innerHTML = `<div class="p-8 text-center text-red-500 mt-10 font-medium">Ups, ada sedikit kesalahan. Coba refresh halaman Anda.</div>`;
-                    }
+                    try { content.innerHTML = views[viewName](); } 
+                    catch (err) { content.innerHTML = `<div class="p-8 text-center text-red-500 font-bold">Error loading view.</div>`; }
                     
                     app.currentView = viewName;
                     
+                    // Update Nav
                     document.querySelectorAll('.nav-item').forEach(el => {
                         const icon = el.querySelector('i, svg');
                         const span = el.querySelector('span');
                         if (el.dataset.target === viewName) {
-                            el.classList.remove('text-slate-400', 'dark:text-slate-500');
-                            el.classList.add('text-primary');
+                            el.classList.replace('text-zinc-400', 'text-primary');
+                            el.classList.replace('dark:text-zinc-500', 'text-primary');
                             if(span) span.classList.add('font-bold');
-                            if(icon) {
-                                icon.classList.add('animate-pop');
-                                setTimeout(() => icon.classList.remove('animate-pop'), 300);
-                            }
+                            if(icon) { icon.classList.add('animate-pop'); setTimeout(() => icon.classList.remove('animate-pop'), 300); }
                         } else {
                             el.classList.remove('text-primary');
-                            el.classList.add('text-slate-400', 'dark:text-slate-500');
+                            el.classList.add('text-zinc-400', 'dark:text-zinc-500');
                             if(span) span.classList.remove('font-bold');
                         }
                     });
 
-                    const nav = document.querySelector('nav');
-                    const fab = document.getElementById('fab-btn');
-                    if(viewName === 'settings') {
-                        nav.classList.add('hidden');
-                        fab.classList.add('hidden');
-                    } else {
-                        nav.classList.remove('hidden');
-                        fab.classList.remove('hidden');
-                    }
+                    const navContainer = document.getElementById('bottom-nav-container');
+                    if(viewName === 'settings') navContainer.classList.add('translate-y-32');
+                    else navContainer.classList.remove('translate-y-32');
 
-                    if(typeof lucide !== 'undefined') lucide.createIcons();
+                    if(window.lucide) lucide.createIcons();
                     
-                    content.style.transition = 'opacity 0.2s ease-in';
                     content.style.opacity = '1';
                 }, 150);
             },
@@ -1201,45 +1134,28 @@
                         m.classList.add('opacity-0');
                         m.children[0].classList.add('sm:scale-95'); 
                         if(window.innerWidth < 640) m.children[0].classList.add('translate-y-full');
-                        
                         setTimeout(() => m.classList.add('hidden'), 300);
                     });
-
-                    setTimeout(() => {
-                        overlay.classList.add('hidden');
-                        quickAdd.classList.add('hidden');
-                    }, 300);
+                    setTimeout(() => { overlay.classList.add('hidden'); quickAdd.classList.add('hidden'); }, 300);
                 };
 
                 fab.addEventListener('click', () => {
-                    overlay.classList.remove('hidden');
-                    quickAdd.classList.remove('hidden');
-                    setTimeout(() => {
-                        overlay.classList.remove('opacity-0');
-                        quickAdd.classList.remove('translate-y-full');
-                    }, 10);
+                    overlay.classList.remove('hidden'); quickAdd.classList.remove('hidden');
+                    setTimeout(() => { overlay.classList.remove('opacity-0'); quickAdd.classList.remove('translate-y-full'); }, 10);
                 });
-
                 overlay.addEventListener('click', closeAll);
-                document.querySelectorAll('.close-modal-btn').forEach(btn => {
-                    btn.addEventListener('click', closeAll);
-                });
-
+                document.querySelectorAll('.close-modal-btn').forEach(b => b.addEventListener('click', closeAll));
                 app.closeModals = closeAll;
             },
 
             openModal: (modalId, dataId = null, defaultDate = null) => {
                 document.getElementById('quick-add-sheet').classList.add('translate-y-full');
-                
                 const modal = document.getElementById(modalId);
                 const overlay = document.getElementById('overlay');
                 
-                overlay.classList.remove('hidden');
-                modal.classList.remove('hidden');
-                
+                overlay.classList.remove('hidden'); modal.classList.remove('hidden');
                 setTimeout(() => {
-                    overlay.classList.remove('opacity-0');
-                    modal.classList.remove('opacity-0');
+                    overlay.classList.remove('opacity-0'); modal.classList.remove('opacity-0');
                     modal.children[0].classList.remove('sm:scale-95');
                     if(window.innerWidth < 640) modal.children[0].classList.remove('translate-y-full');
                 }, 10);
@@ -1249,9 +1165,8 @@
                     form.reset();
                     document.getElementById('task-id').value = '';
                     document.getElementById('task-date').value = defaultDate || utils.getTodayStr();
-                    
-                    const now = new Date();
-                    document.getElementById('task-start-time').value = `${String(now.getHours()).padStart(2,'0')}:00`;
+                    document.getElementById('task-repeat').value = 'none';
+                    document.getElementById('task-start-time').value = `${String(new Date().getHours()).padStart(2,'0')}:00`;
                     document.getElementById('task-modal-title').textContent = 'Tambah Jadwal';
 
                     if (dataId) {
@@ -1260,40 +1175,18 @@
                             document.getElementById('task-id').value = task.id;
                             document.getElementById('task-title').value = task.title;
                             document.getElementById('task-date').value = task.date;
+                            document.getElementById('task-repeat').value = task.repeat || 'none';
                             document.getElementById('task-category').value = task.category;
                             document.getElementById('task-start-time').value = task.startTime;
-                            document.getElementById('task-end-time').value = task.endTime;
                             document.getElementById('task-desc').value = task.desc;
                             document.getElementById('task-modal-title').textContent = 'Edit Jadwal';
-                            
-                            if(!document.getElementById('delete-task-btn')) {
-                                const delBtn = document.createElement('button');
-                                delBtn.id = 'delete-task-btn';
-                                delBtn.type = 'button';
-                                delBtn.className = 'w-full mt-2 text-red-500 font-medium py-3 rounded-xl hover:bg-red-50 transition-colors';
-                                delBtn.innerText = 'Hapus Jadwal';
-                                delBtn.onclick = () => {
-                                    ui.confirm('Hapus Jadwal', `Yakin ingin menghapus "${task.title}"?`, () => {
-                                        store.deleteTask(task.id);
-                                        app.closeModals();
-                                        app.refreshCurrentView();
-                                        ui.toast('Jadwal dihapus');
-                                    });
-                                };
-                                form.appendChild(delBtn);
-                            }
                         }
-                    } else {
-                        const delBtn = document.getElementById('delete-task-btn');
-                        if(delBtn) delBtn.remove();
                     }
                 } 
                 else if (modalId === 'habit-modal') {
-                    const form = document.getElementById('habit-form');
-                    form.reset();
+                    document.getElementById('habit-form').reset();
                     document.getElementById('habit-id').value = '';
-                    app.selectIcon('check-circle');
-                    app.selectColor('blue');
+                    app.selectIcon('check-circle'); app.selectColor('blue');
                     document.getElementById('habit-modal-title').textContent = 'Tambah Habit';
 
                     if (dataId) {
@@ -1303,30 +1196,9 @@
                             document.getElementById('habit-title').value = habit.title;
                             document.getElementById('habit-target').value = habit.target;
                             document.getElementById('habit-unit').value = habit.unit;
-                            app.selectIcon(habit.icon);
-                            app.selectColor(habit.color);
+                            app.selectIcon(habit.icon); app.selectColor(habit.color);
                             document.getElementById('habit-modal-title').textContent = 'Edit Habit';
-
-                            if(!document.getElementById('delete-habit-btn')) {
-                                const delBtn = document.createElement('button');
-                                delBtn.id = 'delete-habit-btn';
-                                delBtn.type = 'button';
-                                delBtn.className = 'w-full mt-2 text-red-500 font-medium py-3 rounded-xl hover:bg-red-50 transition-colors';
-                                delBtn.innerText = 'Hapus Habit';
-                                delBtn.onclick = () => {
-                                    ui.confirm('Hapus Habit', `Semua progress "${habit.title}" akan hilang. Lanjutkan?`, () => {
-                                        store.deleteHabit(habit.id);
-                                        app.closeModals();
-                                        app.refreshCurrentView();
-                                        ui.toast('Habit dihapus');
-                                    });
-                                };
-                                form.appendChild(delBtn);
-                            }
                         }
-                    } else {
-                        const delBtn = document.getElementById('delete-habit-btn');
-                        if(delBtn) delBtn.remove();
                     }
                 }
             },
@@ -1334,43 +1206,29 @@
             setupForms: () => {
                 document.getElementById('task-form').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    
                     const titleInput = document.getElementById('task-title').value.trim();
-                    if (!titleInput) {
-                        ui.toast('Nama Aktivitas tidak boleh kosong!', 'error');
-                        return;
-                    }
+                    if (!titleInput) { ui.toast('Nama Aktivitas tidak boleh kosong!', 'error'); return; }
 
                     const id = document.getElementById('task-id').value;
                     const taskData = {
                         title: titleInput,
                         date: document.getElementById('task-date').value || utils.getTodayStr(),
+                        repeat: document.getElementById('task-repeat').value || 'none',
                         category: document.getElementById('task-category').value || 'personal',
                         startTime: document.getElementById('task-start-time').value || '00:00',
-                        endTime: document.getElementById('task-end-time').value || '',
                         desc: document.getElementById('task-desc').value || ''
                     };
 
-                    if (id) {
-                        taskData.id = id;
-                        store.updateTask(taskData);
-                        ui.toast('Jadwal diperbarui');
-                    } else {
-                        store.addTask(taskData);
-                        ui.toast('Jadwal ditambahkan');
-                    }
-                    app.closeModals();
-                    app.refreshCurrentView();
+                    if (id) { taskData.id = id; store.updateTask(taskData); ui.toast('Jadwal diperbarui'); } 
+                    else { store.addTask(taskData); ui.toast('Jadwal ditambahkan'); }
+                    
+                    app.closeModals(); app.navigate(app.currentView);
                 });
 
                 document.getElementById('habit-form').addEventListener('submit', (e) => {
                     e.preventDefault();
-                    
                     const titleInput = document.getElementById('habit-title').value.trim();
-                    if (!titleInput) {
-                        ui.toast('Nama Habit tidak boleh kosong!', 'error');
-                        return;
-                    }
+                    if (!titleInput) { ui.toast('Nama Habit tidak boleh kosong!', 'error'); return; }
 
                     const id = document.getElementById('habit-id').value;
                     const habitData = {
@@ -1381,16 +1239,10 @@
                         color: document.getElementById('habit-color').value
                     };
 
-                    if (id) {
-                        habitData.id = id;
-                        store.updateHabit(habitData);
-                        ui.toast('Habit diperbarui');
-                    } else {
-                        store.addHabit(habitData);
-                        ui.toast('Habit ditambahkan');
-                    }
-                    app.closeModals();
-                    app.refreshCurrentView();
+                    if (id) { habitData.id = id; store.updateHabit(habitData); ui.toast('Habit diperbarui'); } 
+                    else { store.addHabit(habitData); ui.toast('Habit ditambahkan'); }
+                    
+                    app.closeModals(); app.navigate(app.currentView);
                 });
             },
 
@@ -1400,20 +1252,18 @@
                 
                 const iconContainer = document.getElementById('icon-selector');
                 icons.forEach(icon => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = 'p-3 rounded-xl flex items-center justify-center border-2 border-transparent hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors icon-btn';
+                    const btn = document.createElement('button'); btn.type = 'button';
+                    btn.className = 'p-3 rounded-2xl flex items-center justify-center border-2 border-transparent hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors icon-btn';
                     btn.dataset.icon = icon;
-                    btn.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 text-gray-500"></i>`;
+                    btn.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 text-zinc-400"></i>`;
                     btn.onclick = () => app.selectIcon(icon);
                     iconContainer.appendChild(btn);
                 });
 
                 const colorContainer = document.getElementById('color-selector');
                 colors.forEach(color => {
-                    const btn = document.createElement('button');
-                    btn.type = 'button';
-                    btn.className = `w-8 h-8 rounded-full border-2 border-transparent flex items-center justify-center color-btn transition-transform`;
+                    const btn = document.createElement('button'); btn.type = 'button';
+                    btn.className = `w-10 h-10 rounded-2xl border-2 border-transparent flex items-center justify-center color-btn transition-transform`;
                     btn.style.backgroundColor = utils.getHabitColorHex(color);
                     btn.dataset.color = color;
                     btn.onclick = () => app.selectColor(color);
@@ -1425,11 +1275,11 @@
                 document.getElementById('habit-icon').value = iconName;
                 document.querySelectorAll('.icon-btn').forEach(btn => {
                     if (btn.dataset.icon === iconName) {
-                        btn.classList.add('bg-indigo-50', 'dark:bg-indigo-900/30', 'border-indigo-200', 'dark:border-indigo-700');
-                        btn.querySelector('i').classList.replace('text-gray-500', 'text-primary');
+                        btn.classList.add('bg-indigo-50', 'dark:bg-indigo-500/10', 'border-indigo-200', 'dark:border-indigo-500/30');
+                        btn.querySelector('i').classList.replace('text-zinc-400', 'text-primary');
                     } else {
-                        btn.classList.remove('bg-indigo-50', 'dark:bg-indigo-900/30', 'border-indigo-200', 'dark:border-indigo-700');
-                        btn.querySelector('i').classList.replace('text-primary', 'text-gray-500');
+                        btn.classList.remove('bg-indigo-50', 'dark:bg-indigo-500/10', 'border-indigo-200', 'dark:border-indigo-500/30');
+                        btn.querySelector('i').classList.replace('text-primary', 'text-zinc-400');
                     }
                 });
             },
@@ -1437,102 +1287,50 @@
             selectColor: (colorName) => {
                 document.getElementById('habit-color').value = colorName;
                 document.querySelectorAll('.color-btn').forEach(btn => {
-                    if (btn.dataset.color === colorName) {
-                        btn.classList.add('scale-110', 'ring-2', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-darkCard', 'ring-gray-400');
-                    } else {
-                        btn.classList.remove('scale-110', 'ring-2', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-darkCard', 'ring-gray-400');
-                    }
+                    if (btn.dataset.color === colorName) btn.classList.add('scale-110', 'ring-2', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-darkCard', 'ring-zinc-400');
+                    else btn.classList.remove('scale-110', 'ring-2', 'ring-offset-2', 'ring-offset-white', 'dark:ring-offset-darkCard', 'ring-zinc-400');
                 });
             },
 
-            toggleTask: (id, event) => {
-                const isCompleted = store.toggleTask(id);
-                const card = event.target.closest('.bg-white, .dark\\:bg-darkCard');
+            toggleTaskUI: (id, dateStr, event) => {
+                const isCompleted = store.toggleTask(id, dateStr);
+                const card = event.target.closest('.glass-card');
                 const title = card.querySelector('h4');
-                const dot = card.previousElementSibling; 
                 
-                if (isCompleted) {
-                    card.classList.add('opacity-70');
-                    title.classList.add('line-through', 'decoration-2', 'decoration-gray-300');
-                    dot.classList.add('!bg-primary');
-                    dot.innerHTML = '<i data-lucide="check" class="w-4 h-4 text-white"></i>';
-                    lucide.createIcons();
-                } else {
-                    card.classList.remove('opacity-70');
-                    title.classList.remove('line-through', 'decoration-2', 'decoration-gray-300');
-                    dot.classList.remove('!bg-primary');
-                    dot.innerHTML = '<div class="w-2.5 h-2.5 rounded-full bg-white dark:bg-gray-400"></div>';
-                }
+                if (isCompleted) title.classList.add('line-through', 'text-zinc-400', 'dark:text-zinc-500');
+                else title.classList.remove('line-through', 'text-zinc-400', 'dark:text-zinc-500');
                 
-                if(app.currentView === 'home') {
-                   setTimeout(() => app.refreshCurrentView(), 300); 
-                }
+                if(app.currentView === 'home') setTimeout(() => app.navigate(app.currentView), 300); 
             },
 
             editTask: (id) => app.openModal('task-modal', id),
-            
             deleteTaskDirect: (id) => {
-                const task = store.data.tasks.find(t => t.id === id);
-                if (task) {
-                    ui.confirm('Hapus Jadwal', `Yakin ingin menghapus "${task.title}"?`, () => {
-                        store.deleteTask(id);
-                        app.refreshCurrentView();
-                        ui.toast('Jadwal dihapus');
-                    });
-                }
-            },
-
-            editHabit: (id) => app.openModal('habit-modal', id),
-
-            deleteHabitDirect: (id) => {
-                const habit = store.data.habits.find(h => h.id === id);
-                if (habit) {
-                    ui.confirm('Hapus Habit', `Semua progress "${habit.title}" akan hilang. Lanjutkan?`, () => {
-                        store.deleteHabit(id);
-                        app.refreshCurrentView();
-                        ui.toast('Habit dihapus');
-                    });
-                }
-            },
-
-            incrementHabit: (id) => {
-                const result = store.updateHabitProgress(id, utils.getTodayStr());
-                app.refreshCurrentView();
-                
-                if (result.completed && result.progress === store.data.habits.find(h=>h.id===id).target) {
-                    ui.toast('Target habit tercapai! 🎉');
-                }
-            },
-
-            decrementHabit: (id) => {
-                store.updateHabitProgress(id, utils.getTodayStr(), -1);
-                app.refreshCurrentView();
-            },
-
-            changeTheme: (themeStr) => {
-                store.data.settings.theme = themeStr;
-                store.save();
-                ui.applyTheme();
-            },
-
-            clearData: () => {
-                ui.confirm('Hapus Semua Data', 'Semua jadwal, habit, dan pengaturan akan dihapus permanen.', () => {
-                    localStorage.removeItem(StorageKey);
-                    location.reload();
+                ui.confirm('Hapus Jadwal', `Yakin ingin menghapus jadwal ini?`, () => {
+                    store.deleteTask(id); app.navigate(app.currentView); ui.toast('Jadwal dihapus');
                 });
             },
 
-            exportData: () => {
-                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(store.data));
-                const dlAnchorElem = document.createElement('a');
-                dlAnchorElem.setAttribute("href", dataStr);
-                dlAnchorElem.setAttribute("download", "myschedule_backup.json");
-                dlAnchorElem.click();
-                ui.toast('Data berhasil diekspor');
+            editHabit: (id) => app.openModal('habit-modal', id),
+            deleteHabitDirect: (id) => {
+                ui.confirm('Hapus Habit', `Progress habit ini akan hilang. Lanjutkan?`, () => {
+                    store.deleteHabit(id); app.navigate(app.currentView); ui.toast('Habit dihapus');
+                });
+            },
+            incrementHabit: (id) => {
+                const res = store.updateHabitProgress(id, utils.getTodayStr());
+                app.navigate(app.currentView);
+                if (res.completed && res.progress === store.data.habits.find(h=>h.id===id).target) ui.toast('Target tercapai! 🎉');
+            },
+            decrementHabit: (id) => { store.updateHabitProgress(id, utils.getTodayStr(), -1); app.navigate(app.currentView); },
+
+            changeTheme: (themeStr) => { store.data.settings.theme = themeStr; store.save(); ui.applyTheme(); },
+            clearData: () => {
+                ui.confirm('Hapus Semua Data', 'Semua jadwal dan habit akan terhapus.', () => {
+                    localStorage.removeItem(StorageKey); location.reload();
+                });
             },
 
-            // --- STREAMING_CHUNK:Database Auto Sync Logic... ---
-            autoLoadFromCloud: async () => {
+            autoLoadFromCloud: async (forceNotify = false) => {
                 try {
                     const response = await fetch(CONFIG.GAS_URL);
                     const cloudData = await response.json();
@@ -1541,41 +1339,33 @@
                         const localUpdate = store.data.lastUpdated || 0;
                         const cloudUpdate = cloudData.lastUpdated || 0;
                         
-                        // HANYA timpa data lokal jika data di Cloud BENAR-BENAR lebih baru
-                        if (cloudUpdate > localUpdate || localUpdate === 0) {
+                        // Menimpa jika data cloud lebih baru ATAU jika user klik tombol manual
+                        if (cloudUpdate > localUpdate || localUpdate === 0 || forceNotify) {
                             store.data = cloudData;
                             localStorage.setItem(StorageKey, JSON.stringify(store.data));
                             ui.applyTheme();
-                            if(app.currentView) app.refreshCurrentView();
+                            if(app.currentView) app.navigate(app.currentView);
+                            if(forceNotify) ui.toast('Data berhasil didownload dari Cloud');
+                        } else if(forceNotify) {
+                            ui.toast('Data lokal Anda sudah yang paling baru.');
                         }
                     }
                 } catch (error) {
-                    console.error("Gagal load dari cloud:", error);
-                    ui.toast('Gagal konek ke database. Memakai data lokal.', 'error');
+                    console.log("Cloud Error", error);
+                    if(forceNotify) ui.toast('Gagal konek ke database.', 'error');
                 }
-            },
-
-            refreshCurrentView: () => {
-                app.navigate(app.currentView);
             }
         };
 
-        // Mengekspos fungsi-fungsi utama agar bisa dipanggil dari HTML
         window.app = app;
         window.views = views;
 
-        // Start App
         document.addEventListener('DOMContentLoaded', () => {
             app.init();
-            
-            // Tambahan perlindungan untuk dark mode listener pada browser lama
-            if (window.matchMedia) {
-                window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
-                    if (store.data.settings.theme === 'system') ui.applyTheme();
-                });
-            }
+            if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (store.data.settings.theme === 'system') ui.applyTheme();
+            });
         });
-
     </script>
 </body>
 </html>
