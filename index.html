@@ -257,12 +257,12 @@
                     <input type="hidden" id="task-id">
                     <div>
                         <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nama Aktivitas</label>
-                        <input type="text" id="task-title" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary dark:focus:border-primary transition-colors" placeholder="Cth: Meeting Tim, Olahraga">
+                        <input type="text" id="task-title" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary dark:focus:border-primary transition-colors" placeholder="Cth: Meeting Tim, Olahraga">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Tanggal</label>
-                            <input type="date" id="task-date" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
+                            <input type="date" id="task-date" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Kategori</label>
@@ -277,7 +277,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Mulai</label>
-                            <input type="time" id="task-start-time" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
+                            <input type="time" id="task-start-time" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Selesai</label>
@@ -308,12 +308,12 @@
                     <input type="hidden" id="habit-id">
                     <div>
                         <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Nama Habit</label>
-                        <input type="text" id="habit-title" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors" placeholder="Cth: Minum Air, Membaca 10 Hal">
+                        <input type="text" id="habit-title" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors" placeholder="Cth: Minum Air, Membaca 10 Hal">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Target (per hari)</label>
-                            <input type="number" id="habit-target" min="1" value="1" required class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
+                            <input type="number" id="habit-target" min="1" value="1" class="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 outline-none focus:border-primary transition-colors text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Satuan</label>
@@ -366,7 +366,7 @@
         // --- KONFIGURASI DATABASE ONLINE ---
         const CONFIG = {
             // Wajib: Paste URL Web App Google Apps Script Anda di dalam tanda kutip di bawah ini!
-            GAS_URL: 'MASUKKAN_URL_GAS_ANDA_DISINI'
+            GAS_URL: 'https://script.google.com/macros/s/AKfycbzrC0YAoecga039FYAZ9Dkn6zE68tlcJL5JTCX_ZnUfrwJfvXSBc0kNgAkrvFLptbq7Tg/exec'
         };
 
         // --- DATA & STATE MANAGEMENT ---
@@ -1336,9 +1336,16 @@
             setupForms: () => {
                 document.getElementById('task-form').addEventListener('submit', (e) => {
                     e.preventDefault();
+                    
+                    const titleInput = document.getElementById('task-title').value.trim();
+                    if (!titleInput) {
+                        ui.toast('Nama Aktivitas tidak boleh kosong!', 'error');
+                        return;
+                    }
+
                     const id = document.getElementById('task-id').value;
                     const taskData = {
-                        title: document.getElementById('task-title').value,
+                        title: titleInput,
                         date: document.getElementById('task-date').value,
                         category: document.getElementById('task-category').value,
                         startTime: document.getElementById('task-start-time').value,
@@ -1360,10 +1367,17 @@
 
                 document.getElementById('habit-form').addEventListener('submit', (e) => {
                     e.preventDefault();
+                    
+                    const titleInput = document.getElementById('habit-title').value.trim();
+                    if (!titleInput) {
+                        ui.toast('Nama Habit tidak boleh kosong!', 'error');
+                        return;
+                    }
+
                     const id = document.getElementById('habit-id').value;
                     const habitData = {
-                        title: document.getElementById('habit-title').value,
-                        target: parseInt(document.getElementById('habit-target').value),
+                        title: titleInput,
+                        target: parseInt(document.getElementById('habit-target').value) || 1,
                         unit: document.getElementById('habit-unit').value,
                         icon: document.getElementById('habit-icon').value,
                         color: document.getElementById('habit-color').value
